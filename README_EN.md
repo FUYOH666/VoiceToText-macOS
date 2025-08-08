@@ -38,6 +38,12 @@ Manual run after setup:
 
 Grant Accessibility/Microphone permissions in macOS System Settings.
 
+Note: models are not downloaded automatically.
+
+- Whisper (MLX) is used ONLY locally. Download the model manually and place
+  the files into `./models` (see “Models” below).
+- VAD and Punctuation also work locally and will cache into `./cache`.
+
 ## Settings (`config.yaml`)
 
 ```yaml
@@ -65,6 +71,15 @@ vad:
 - Whisper (MLX)
 - Silero VAD
 - Punctuation model (RU)
+
+How to prepare Whisper (MLX) manually:
+
+1) Open the public model page `mlx-community/whisper-large-v3-mlx`.
+2) Download the MLX model files (e.g. `config.json` and `weights.npz`).
+3) Put them into the `./models` folder next to the project.
+4) Ensure `config.yaml` has `models.whisper.path: "./models"`.
+
+After that, the app runs fully offline with no tokens and no internet.
 
 ## Build .app (optional)
 

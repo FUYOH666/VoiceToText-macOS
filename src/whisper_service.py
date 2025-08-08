@@ -7,7 +7,6 @@ import logging
 import numpy as np
 import gc
 from pathlib import Path
-import os
 from typing import Dict, Any
 import mlx_whisper
 from .memory_manager import free_memory
@@ -65,11 +64,6 @@ class WhisperService:
             # Транскрибируем аудио с защитой от повторений
             whisper_path = self._preferred_model_path
 
-            # Если используем HF-репозиторий, уберем возможные битые токены,
-            # чтобы избежать 401 при публичном доступе
-            if not Path(whisper_path).exists():
-                self._disable_hf_auth()
-
             result = mlx_whisper.transcribe(
                 audio=audio_data,
                 path_or_hf_repo=whisper_path,
@@ -108,49 +102,6 @@ class WhisperService:
             
         except Exception as e:
             self.logger.error(f"Ошибка распознавания речи: {e}")
-            # Авто-переход на локальную модель при 401/битой авторизации HF
-            if self._is_auth_error(e):
-                local_fallback = self._local_model_dir()
-                if local_fallback is not None and Path(local_fallback).exists():
-                    try:
-                        self.logger.warning(
-                            "HF недоступен/неавторизован. Повтор с локальной моделью: %s",
-                            local_fallback,
-                        )
-                        result = mlx_whisper.transcribe(
-                            audio=audio_data,
-                            path_or_hf_repo=str(local_fallback),
-                            temperature=0.2,
-                            compression_ratio_threshold=2.0,
-                            logprob_threshold=-0.8,
-                            no_speech_threshold=0.6,
-                            condition_on_previous_text=False,
-                            suppress_tokens=[-1],
-                            word_timestamps=True,
-                            language=language,
-                        )
-
-                        segments = result.get("segments", [])
-                        clean_text = self._remove_repetitions(result["text"].strip())
-                        formatted_result = {
-                            "text": clean_text,
-                            "language": result.get("language", language),
-                            "segments": segments,
-                            "words": self._extract_words(segments),
-                            "duration": len(audio_data) / 16000,
-                            "confidence": self._calculate_confidence(segments),
-                        }
-
-                        if self.clear_cache:
-                            self._cleanup_memory()
-                            free_memory("whisper-after-transcribe")
-
-                        return formatted_result
-                    except Exception as inner:
-                        self.logger.error(
-                            f"Повтор с локальной моделью не удался: {inner}"
-                        )
-
             # 🆕 Очистка памяти даже при ошибке
             if self.clear_cache:
                 self._cleanup_memory()
@@ -187,9 +138,6 @@ class WhisperService:
             # Используем MLX Whisper для файла с защитой от повторений
             whisper_path = self._preferred_model_path
 
-            if not Path(whisper_path).exists():
-                self._disable_hf_auth()
-
             result = mlx_whisper.transcribe(
                 audio=str(file_path),
                 path_or_hf_repo=whisper_path,
@@ -221,44 +169,6 @@ class WhisperService:
             
         except Exception as e:
             self.logger.error(f"Ошибка распознавания файла: {e}")
-            if self._is_auth_error(e):
-                local_fallback = self._local_model_dir()
-                if local_fallback is not None and Path(local_fallback).exists():
-                    try:
-                        self.logger.warning(
-                            "HF недоступен/неавторизован. Повтор с локальной моделью: %s",
-                            local_fallback,
-                        )
-                        result = mlx_whisper.transcribe(
-                            audio=str(file_path),
-                            path_or_hf_repo=str(local_fallback),
-                            temperature=0.2,
-                            compression_ratio_threshold=2.0,
-                            logprob_threshold=-0.8,
-                            no_speech_threshold=0.6,
-                            condition_on_previous_text=False,
-                            suppress_tokens=[-1],
-                            language=language,
-                            word_timestamps=True,
-                        )
-
-                        segments = result.get("segments", [])
-                        clean_text = self._remove_repetitions(result["text"].strip())
-                        formatted_result = {
-                            "text": clean_text,
-                            "language": result.get("language", language),
-                            "segments": segments,
-                            "words": self._extract_words(segments),
-                            "confidence": self._calculate_confidence(segments),
-                        }
-
-                        if self.clear_cache:
-                            self._cleanup_memory()
-                        return formatted_result
-                    except Exception as inner:
-                        self.logger.error(
-                            f"Повтор с локальной моделью не удался: {inner}"
-                        )
             # 🆕 Очистка памяти даже при ошибке
             if self.clear_cache:
                 self._cleanup_memory()
@@ -277,7 +187,7 @@ class WhisperService:
             self.logger.error(f"Ошибка очистки памяти Whisper: {e}")
 
     def _resolve_whisper_path(self) -> str:
-        """Определяет путь к модели: локальный каталог при наличии, иначе значение из конфига."""
+        """Определяет путь к локальной модели. Ошибку бросает, если модель не найдена."""
         try:
             cfg = self.config.models.get("whisper", {})
             cfg_path = cfg.get("path")
@@ -296,10 +206,14 @@ class WhisperService:
                 weights_file = root_models / "weights.npz"
                 if cfg_file.exists() and weights_file.exists():
                     return str(root_models)
-            # Фолбэк к тому, что задано (HF repo id и т.п.)
-            return str(cfg_path) if cfg_path else "mlx-community/whisper-large-v3-mlx"
+            # Ничего не нашли — сообщаем понятной ошибкой
+            raise FileNotFoundError(
+                "Не найдена локальная модель Whisper. Скачайте файлы модели (config.json, "
+                "weights.npz) со страницы `mlx-community/whisper-large-v3-mlx` и поместите их "
+                "в каталог ./models, либо укажите корректный путь в config.yaml (models.whisper.path)."
+            )
         except Exception:
-            return "mlx-community/whisper-large-v3-mlx"
+            raise
 
     def _local_model_dir(self) -> str | None:
         """Возвращает путь к локальной модели, если она существует."""
@@ -323,20 +237,7 @@ class WhisperService:
             return str(root_models)
         return None
 
-    def _disable_hf_auth(self):
-        """Убирает переменные окружения токенов HF, чтобы не слать битый Authorization."""
-        for var in ("HUGGINGFACE_HUB_TOKEN", "HF_TOKEN"):
-            if var in os.environ:
-                os.environ.pop(var, None)
-
-    def _is_auth_error(self, exc: Exception) -> bool:
-        """Проверяет, похоже ли исключение на ошибку авторизации HF (401)."""
-        msg = str(exc).lower()
-        return (
-            "401" in msg
-            or "unauthorized" in msg
-            or "invalid credentials" in msg
-        )
+    # HF‑логика удалена: приложение использует только локальные модели
     
     def _extract_words(self, segments: list) -> list:
         """

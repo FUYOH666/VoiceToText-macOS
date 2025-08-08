@@ -6,7 +6,7 @@ app:
 # Models paths
 models:
   whisper:
-    path: "mlx-community/whisper-large-v3-mlx"  # HF repo id (auto-downloads)
+    path: "./models"  # локальный путь с файлами модели (config.json, weights.npz)
     model_type: "whisper-large-v3-mlx"
   
   punctuation:
