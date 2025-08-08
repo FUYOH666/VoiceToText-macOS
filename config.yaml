@@ -6,7 +6,7 @@ app:
 # Models paths
 models:
   whisper:
-    path: "./models"  # MLX Whisper model
+    path: "mlx-community/whisper-large-v3-mlx"  # HF repo id (auto-downloads)
     model_type: "whisper-large-v3-mlx"
   
   punctuation:
