@@ -1,0 +1,59 @@
+# SuperWhisper Configuration
+app:
+  name: "SuperWhisper Local"
+  version: "1.1.0"
+  
+# Models paths
+models:
+  whisper:
+    path: "./models"  # MLX Whisper model
+    model_type: "whisper-large-v3-mlx"
+  
+  punctuation:
+    model_name: "DeepPavlov/rubert-base-cased-sentence"
+    cache_dir: "./cache/punctuation"
+    lazy_load: true
+  
+  vad:
+    model_path: "silero_vad"
+    cache_dir: "./cache/vad"
+    lazy_load: true
+
+# LM Studio API for TL;DR
+llm:
+  endpoint: "http://192.168.1.110:1234"
+  model: "yandexgpt-5-lite-8b-instruct"
+  timeout: 30
+  max_tokens: 500
+  temperature: 0.7
+
+# Audio settings
+audio:
+  sample_rate: 16000
+  chunk_duration: 30  # seconds
+  vad_threshold: 0.5
+  silence_duration: 2.0  # seconds of silence to stop recording
+  max_recording_duration: 600  # максимум 10 минут (0 = без лимита)
+  buffer_cleanup_after_processing: true  # очищать буфер после обработки
+
+# UI settings
+ui:
+  hotkey: "option+space"
+  show_live_transcription: true
+  auto_copy_to_clipboard: true
+  auto_paste_enabled: true
+  auto_paste_delay: 0.1
+  auto_paste_force_mode: true   # Принудительная вставка без проверок
+  window_width: 600
+  window_height: 400
+
+# Performance
+performance:
+  max_memory_gb: 8
+  use_neural_engine: true
+  cache_transcriptions: true
+  cache_dir: "./cache"
+  use_async_processing: false  # Отключено пока не стабилизируется 
+  force_garbage_collection: true  # принудительная сборка мусора
+  clear_model_cache_after_use: true  # очистка кеша модели после использования
+  max_concurrent_threads: 2  # ограничение на количество потоков 

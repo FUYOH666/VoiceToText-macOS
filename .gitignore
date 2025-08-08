@@ -1,0 +1,120 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.dylib
+*.egg-info/
+.mypy_cache/
+.pytype/
+.ruff_cache/
+.venv/
+venv/
+
+# Editors/IDE
+.idea/
+.vscode/
+*.swp
+
+# Tests/Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# App caches and local artifacts
+cache/
+models/*
+!models/README.md
+
+# Build/Dist
+dist/
+build/
+*.spec
+
+# Logs
+*.log
+
+# Notebooks
+.ipynb_checkpoints/
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# Models and Cache
+models/
+cache/
+*.model
+*.bin
+*.safetensors
+
+# Audio files
+*.wav
+*.mp3
+*.m4a
+*.aac
+
+# Logs
+*.log
+logs/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Configuration overrides
+config.local.yaml
+.env
+.env.local
+
+# Test outputs
+test_output/
+test_recordings/ 
