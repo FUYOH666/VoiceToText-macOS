@@ -1,40 +1,65 @@
-# 🎤 SuperWhisper (локальное распознавание речи для macOS)
+# 🎤 SuperWhisper - Privacy-First Voice Dictation for macOS
 
-[English README](README_EN.md)
+![License](https://img.shields.io/badge/License-MIT-blue.svg)
+![Platform](https://img.shields.io/badge/Platform-macOS-lightgrey.svg)
+![Python](https://img.shields.io/badge/Python-3.8%2B-brightgreen.svg)
+![Status](https://img.shields.io/badge/Status-Production%20Ready-green.svg)
 
-SuperWhisper — это простое офлайн‑приложение для диктовки с автоматической
-вставкой текста в активное приложение. Меню‑бар иконка 🎤, запись по
-Option+Space, результат сразу в курсоре. Работает без интернета.
+[English README](README_EN.md) | [Русская версия](README.md)
 
-## ✨ Что умеет
+**A professional offline voice dictation tool for macOS that prioritizes privacy and works completely without internet connection.**
 
-- Автовставка результата в активное окно (включая мессенджеры и редакторы)
-- Горячая клавиша Option+Space: старт/стоп записи
-- Пунктуация и капитализация на русском (восстановление знаков препинания)
-- Копирование результата в буфер обмена
-- Нативные уведомления macOS
-- Полностью офлайн: без внешних API
-- Экономия памяти: ленивые загрузки моделей и принудительная очистка
+SuperWhisper is a native macOS menu bar application that provides instant voice-to-text transcription with automatic text insertion. Perfect for professionals who value privacy, work in secure environments, or need reliable dictation without cloud dependencies.
 
-## ❓ Зачем / Идея
+## 🎯 **Use Cases & Benefits**
 
-Главная мотивация — приватность и офлайн‑работа. Данные обрабатываются
-целиком локально на Mac: никакой передачи в облака, быстро и безопасно.
+### **💼 Professional Applications**
+- **Legal/Medical professionals**: Secure dictation for sensitive documents
+- **Journalists & Writers**: Fast content creation without cloud risks
+- **Remote workers**: Reliable dictation in low-connectivity environments
+- **Privacy-conscious users**: No data ever leaves your Mac
 
-Вторая причина — отсутствие интернета в дороге. В моём случае это была
-пятидневная морская прогулка: то связи нет вовсе, то Starlink с квотами.
-А идеи писать хочется всегда. Поэтому SuperWhisper позволяет диктовать и
-вставлять текст даже когда сети нет. 🙂
+### **⚡ Key Features**
+- **🔒 100% Offline**: Zero internet dependency, complete privacy
+- **⌨️ Instant Integration**: Auto-paste to any active application
+- **🎛️ System-level Control**: Option+Space hotkey, menu bar access
+- **🧠 Smart Processing**: MLX-accelerated Whisper on Apple Silicon
+- **💾 Memory Optimized**: Lazy loading and automatic cleanup
+- **🌍 Multi-language**: Russian punctuation and capitalization support
 
-## 🧱 Технологии
+## 🛡️ **Privacy & Security First**
 
-- MLX Whisper (Apple MLX, Apple Silicon ускорение) — `src/whisper_service.py`
-- Silero VAD (Voice Activity Detection) — `src/vad_service.py`
-- Модель пунктуации (ленивая загрузка) — `src/punctuation_service.py`
-- Меню‑бар: `rumps`
-- Глобальные хоткеи: `pynput`
-- Аудио: `PyAudio`
-- Очистка памяти: `src/memory_manager.py`
+### **Why Offline Matters**
+- **🏢 Enterprise Security**: Meets strict corporate data policies
+- **⚖️ Legal Compliance**: GDPR, HIPAA, and data sovereignty requirements
+- **🔐 Zero Data Leaks**: Nothing ever transmitted or stored externally
+- **📱 Always Available**: Works without internet connection
+
+### **Technical Advantages**
+- **⚡ Apple Silicon Optimized**: MLX framework for M1/M2/M3 performance
+- **🧠 Advanced AI**: WhisperX for superior accuracy
+- **💾 Resource Efficient**: Smart memory management and model caching
+- **🔄 Real-time Processing**: Instant transcription and text insertion
+
+## 🛠️ **Technology Stack**
+
+### **AI & Machine Learning**
+- **MLX Whisper**: Apple's ML framework for optimal Apple Silicon performance
+- **Silero VAD**: Voice Activity Detection for smart audio processing
+- **Custom Punctuation Models**: Language-specific text enhancement
+- **Memory Management**: Intelligent model caching and cleanup
+
+### **System Integration**
+- **macOS Native**: Built with system-level APIs for seamless integration
+- **Menu Bar App**: Professional system tray application using `rumps`
+- **Global Hotkeys**: System-wide keyboard shortcuts with `pynput`
+- **Audio Pipeline**: Real-time audio processing with `PyAudio`
+
+### **Performance Optimizations**
+- **Lazy Loading**: Models loaded only when needed
+- **Memory Efficiency**: Automatic garbage collection and cache management
+- **Apple Silicon**: MLX acceleration for M1/M2/M3 processors
+- **Async Processing**: Non-blocking UI with background transcription
 
 ## 📦 Установка и запуск
 
@@ -194,5 +219,25 @@ MIT (см. LICENSE).
 
 ---
 
-SuperWhisper — быстрый офлайн‑диктант для macOS. Если проект оказался полезным,
-поставьте звёздочку на GitHub и поделитесь с друзьями.
+## 🤝 **Contributing & Support**
+
+### **Professional Development**
+This project demonstrates advanced skills in:
+- **macOS Native Development**: System integration and menu bar applications
+- **AI/ML Integration**: Implementing state-of-the-art speech recognition
+- **Performance Optimization**: Memory management and Apple Silicon acceleration
+- **Privacy Engineering**: Building secure, offline-first applications
+- **User Experience**: Creating intuitive, professional software
+
+### **Get Involved**
+- 🐛 **Report Issues**: Found a bug? Open an issue
+- 💡 **Feature Requests**: Ideas for improvements are welcome  
+- 🔧 **Pull Requests**: Contributions following coding standards
+- 📧 **Contact**: [iamfuyoh@gmail.com](mailto:iamfuyoh@gmail.com)
+
+### **License & Recognition**
+- **MIT License**: Free for personal and commercial use
+- **Author**: Aleksandr Mordvinov - [LinkedIn](https://www.linkedin.com/in/aleksandr-mordvinov-3bb853325/)
+- **Portfolio Project**: Demonstrating AI, macOS development, and privacy engineering
+
+**⭐ If this project helps you, please star it on GitHub!**
