@@ -1,11 +1,17 @@
-# 🎤 SuperWhisper - Privacy-First Voice Dictation for macOS
+# 🎤 VoiceToText-macOS - Privacy-First Voice Dictation for macOS
 
 ![License](https://img.shields.io/badge/License-MIT-blue.svg)
 ![Platform](https://img.shields.io/badge/Platform-macOS-lightgrey.svg)
 ![Python](https://img.shields.io/badge/Python-3.8%2B-brightgreen.svg)
 ![Status](https://img.shields.io/badge/Status-Production%20Ready-green.svg)
 
-[Русская версия](README.md) | [English README](README_EN.md)
+<div align="center">
+
+**🌍 Language:** [🇷🇺 Русский (Main)](README.md) | [🇺🇸 English](README_EN.md)
+
+*👆 For the primary documentation, please see the Russian version*
+
+</div>
 
 **Professional offline voice dictation tool for macOS that prioritizes privacy and works completely without internet connection.**
 
@@ -138,5 +144,17 @@ This project demonstrates expertise in:
 - **Portfolio**: Professional demonstration of AI and macOS development skills
 - **Contact**: [iamfuyoh@gmail.com](mailto:iamfuyoh@gmail.com)
 - **LinkedIn**: [aleksandr-mordvinov](https://www.linkedin.com/in/aleksandr-mordvinov-3bb853325/)
+
+---
+
+## 🔄 **Quick Navigation**
+
+**📖 Main Documentation**: [Russian README](README.md) - Primary and most complete version
+
+**🚀 Quick Links**:
+- **⬇️ Installation**: `git clone https://github.com/FUYOH666/VoiceToText-macOS.git && cd VoiceToText-macOS && ./install_and_run.sh`
+- **🎯 Usage**: Option+Space to start/stop recording
+- **🐛 Issues**: [Report bugs](https://github.com/FUYOH666/VoiceToText-macOS/issues)
+- **💡 Features**: [Request features](https://github.com/FUYOH666/VoiceToText-macOS/issues/new?template=feature_request.md)
 
 **⭐ Star this project if you find it useful for your professional work!**
