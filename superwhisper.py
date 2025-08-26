@@ -19,7 +19,6 @@ from src.config import Config  # noqa: E402
 from src.audio_recorder import AudioRecorder  # noqa: E402
 from src.whisper_service import WhisperService  # noqa: E402
 from src.punctuation_service import PunctuationService  # noqa: E402
-from src.llm_service import LLMService  # noqa: E402
 from src.notification_service import NotificationService  # noqa: E402
 from src.hotkey_manager import HotkeyManager  # noqa: E402
 from src.auto_paste import AutoPasteService  # noqa: E402
@@ -76,7 +75,6 @@ class SuperWhisperSimple(rumps.App):
             # Основные сервисы
             self.whisper_service = WhisperService(self.config)
             self.punctuation_service = PunctuationService(self.config)
-            self.llm_service = LLMService(self.config)
             self.notification_service = NotificationService()
             self.audio_recorder = AudioRecorder(self.config)
             
@@ -86,8 +84,7 @@ class SuperWhisperSimple(rumps.App):
             # Async процессор для ускорения
             self.async_processor = AsyncSpeechProcessor(
                 self.whisper_service,
-                self.punctuation_service,
-                self.llm_service
+                self.punctuation_service
             )
             
             self.logger.info("Все сервисы инициализированы")

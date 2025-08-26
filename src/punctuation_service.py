@@ -6,7 +6,6 @@ import logging
 import re
 from typing import Dict, Any, List
 from pathlib import Path
-from transformers import pipeline, AutoTokenizer, AutoModelForTokenClassification
 
 
 class PunctuationService:
@@ -23,48 +22,8 @@ class PunctuationService:
         self.logger = logging.getLogger(__name__)
         self.model = None
         self.tokenizer = None
-        # Загрузка модели может быть тяжёлой; загружаем лениво при первом использовании
-        # чтобы не держать память без необходимости
-        try:
-            lazy_key = "lazy_load"
-            lazy = getattr(self.config, "models", {}).get("punctuation", {}).get(lazy_key, True)
-        except Exception:
-            lazy = True
-
-        if not lazy:
-            self._load_model()
-    
-    def _load_model(self):
-        """Загружает модель для восстановления пунктуации"""
-        try:
-            model_name = self.config.models["punctuation"]["model_name"]
-            cache_dir = Path(self.config.models["punctuation"]["cache_dir"])
-            cache_dir.mkdir(parents=True, exist_ok=True)
-            
-            self.logger.info(f"Загрузка модели пунктуации: {model_name}")
-            
-            # Загружаем токенизатор и модель
-            self.tokenizer = AutoTokenizer.from_pretrained(
-                model_name,
-                cache_dir=str(cache_dir)
-            )
-            
-            model = AutoModelForTokenClassification.from_pretrained(
-                model_name,
-                cache_dir=str(cache_dir)
-            )
-            
-            # Для пунктуации используем модель напрямую без pipeline
-            # Так как DeepPavlov/rubert-base-cased-sentence не является моделью для пунктуации по умолчанию
-            self.model = model
-            
-            self.logger.info("Модель пунктуации успешно загружена")
-            
-        except Exception as e:
-            self.logger.error(f"Ошибка загрузки модели пунктуации: {e}")
-            # Используем fallback метод
-            self.model = None
-            self.logger.warning("Будет использован базовый метод пунктуации")
+        # По умолчанию используем улучшенный метод без ML модели
+        self.logger.info("Инициализация сервиса пунктуации без ML модели")
     
     def restore_punctuation(self, text) -> str:
         """
@@ -89,15 +48,7 @@ class PunctuationService:
             self.logger.info(f"Восстановление пунктуации для текста длиной "
                            f"{len(text)} символов")
             
-            # Если модель ещё не загружена — загружаем по требованию
-            if self.model is None:
-                try:
-                    self._load_model()
-                except Exception:
-                    # Падаем обратно на базовую логику
-                    self.model = None
-
-            # Используем улучшенный метод пунктуации
+            # Используем улучшенный метод пунктуации без ML модели
             return self._restore_improved(text)
                 
         except Exception as e:
@@ -339,4 +290,4 @@ class PunctuationService:
         # Исправляем случаи с лишними знаками препинания перед восклицательными знаками
         text = re.sub(r'([.!?])\s*!', r'!', text)
         
-        return text.strip() 
+        return text.strip()

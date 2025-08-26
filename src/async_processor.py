@@ -15,11 +15,10 @@ class AsyncSpeechProcessor:
     """Асинхронный процессор для ускорения постобработки"""
     
     def __init__(self, whisper_service, punctuation_service, 
-                 llm_service=None, max_workers=2):
+                 max_workers=2):
         self.logger = logging.getLogger(__name__)
         self.whisper_service = whisper_service
         self.punctuation_service = punctuation_service
-        self.llm_service = llm_service
         
         # 🆕 Ограничиваем количество потоков из конфигурации
         config_workers = getattr(whisper_service, 'config', None)
@@ -58,32 +57,18 @@ class AsyncSpeechProcessor:
             if not transcribed_text.strip():
                 return "", None
             
-            # Этап 2: Параллельная постобработка (пунктуация + LLM)
+            # Этап 2: Параллельная постобработка (пунктуация)
             if progress_callback:
                 progress_callback("⚡ Параллельная постобработка...")
             
-            # Запускаем пунктуацию и LLM параллельно
-            tasks = [
-                self._async_punctuation(transcribed_text)
-            ]
-            
-            # LLM только если включен
-            llm_enabled = (self.llm_service and 
-                hasattr(self.llm_service, 'enabled') and 
-                         getattr(self.llm_service, 'enabled', False))
-            
-            if llm_enabled:
-                tasks.append(self._async_llm_summary(transcribed_text))
-            else:
-                tasks.append(self._dummy_llm())
-            
-            punctuated_text, llm_summary = await asyncio.gather(*tasks)
+            # Запускаем пунктуацию
+            punctuated_text = await self._async_punctuation(transcribed_text)
             
             # 🆕 Принудительная очистка памяти
             self._cleanup_memory()
             
             self.logger.info("✅ Оптимизированная обработка завершена")
-            return punctuated_text, llm_summary
+            return punctuated_text, None
             
         except Exception as e:
             self.logger.error(f"Ошибка оптимизированной обработки: {e}")
@@ -120,25 +105,6 @@ class AsyncSpeechProcessor:
                 return text
         
         return await loop.run_in_executor(self.executor, restore_punctuation)
-    
-    async def _async_llm_summary(self, text: str) -> Optional[str]:
-        """Асинхронная генерация LLM резюме"""
-        loop = asyncio.get_event_loop()
-        
-        def generate_summary():
-            try:
-                if not self.llm_service:
-                    return None
-                return self.llm_service.generate_summary(text)
-            except Exception as e:
-                self.logger.error(f"Ошибка LLM резюме: {e}")
-                return None
-        
-        return await loop.run_in_executor(self.executor, generate_summary)
-    
-    async def _dummy_llm(self) -> Optional[str]:
-        """Заглушка для LLM если не включен"""
-        return None
     
     def _cleanup_memory(self):
         """🆕 Принудительная очистка памяти после обработки"""
@@ -198,21 +164,3 @@ class AsyncSpeechProcessor:
             )
         finally:
             loop.close()
-    
-    def cleanup(self):
-        """🆕 Явная очистка ресурсов"""
-        try:
-            if hasattr(self, 'executor') and self.executor:
-                self.executor.shutdown(wait=True)
-                self.executor = None
-            self._cleanup_memory()
-            self.logger.info("AsyncProcessor очищен")
-        except Exception as e:
-            self.logger.error(f"Ошибка очистки AsyncProcessor: {e}")
-    
-    def __del__(self):
-        """Cleanup при удалении объекта"""
-        try:
-            self.cleanup()
-        except Exception:
-            pass 
