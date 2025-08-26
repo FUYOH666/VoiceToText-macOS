@@ -1,6 +1,4 @@
-"""
-Сервис для восстановления пунктуации и регистра
-"""
+"""Сервис для восстановления пунктуации и регистра"""
 
 import logging
 import re
@@ -54,14 +52,9 @@ class PunctuationService:
                 cache_dir=str(cache_dir)
             )
             
-            # Создаем pipeline для NER
-            self.model = pipeline(
-                "ner",
-                model=model,
-                tokenizer=self.tokenizer,
-                aggregation_strategy="simple",
-                device=-1  # CPU
-            )
+            # Для пунктуации используем модель напрямую без pipeline
+            # Так как DeepPavlov/rubert-base-cased-sentence не является моделью для пунктуации по умолчанию
+            self.model = model
             
             self.logger.info("Модель пунктуации успешно загружена")
             
@@ -102,81 +95,103 @@ class PunctuationService:
                     # Падаем обратно на базовую логику
                     self.model = None
 
-            # Если модель теперь доступна — используем её
-            if self.model is not None:
-                return self._restore_with_model(text)
-            else:
-                return self._restore_basic(text)
+            # Используем улучшенный метод пунктуации
+            return self._restore_improved(text)
                 
         except Exception as e:
             self.logger.error(f"Ошибка восстановления пунктуации: {e}")
             # Возвращаем базовую обработку
             return self._restore_basic(text)
     
-    def _restore_with_model(self, text: str) -> str:
+    def _restore_improved(self, text: str) -> str:
         """
-        Восстанавливает пунктуацию с помощью ML модели
+        Улучшенное восстановление пунктуации без ML модели
         
         Args:
             text: Исходный текст
             
         Returns:
-            Обработанный текст
+            Текст с улучшенной пунктуацией
         """
         try:
-            # Разбиваем длинный текст на части
-            max_length = 400  # Максимальная длина для модели
+            # Очищаем текст
+            result = text.strip()
             
-            if len(text) <= max_length:
-                return self._process_chunk(text)
+            if not result:
+                return result
             
-            # Обрабатываем по частям
-            chunks = self._split_text(text, max_length)
-            processed_chunks = []
+            # Разбиваем на предложения по логическим паузам и словам
+            sentences = self._split_into_sentences(result)
             
-            for chunk in chunks:
-                processed_chunk = self._process_chunk(chunk)
-                processed_chunks.append(processed_chunk)
+            processed_sentences = []
+            for i, sentence in enumerate(sentences):
+                sentence = sentence.strip()
+                if sentence:
+                    # Капитализируем первую букву
+                    sentence = sentence[0].upper() + sentence[1:] if len(sentence) > 1 else sentence.upper()
+                    
+                    # Определяем тип предложения по ключевым словам
+                    question_words = ["как", "почему", "когда", "где", "что", "зачем", "кто", "куда", "откуда"]
+                    exclamatory_words = ["стоп", "хватит", "прекрати", "остановись", "ужас", "боже", "вау"]
+                    
+                    if any(word in sentence.lower() for word in question_words) and not any(sentence.lower().startswith(q) for q in question_words):
+                        # Вопросительные предложения (кроме начинающихся с вопросительных слов)
+                        if not sentence.endswith('?'):
+                            sentence += '?'
+                    elif any(word in sentence.lower() for word in exclamatory_words):
+                        # Восклицательные предложения
+                        if not sentence.endswith('!'):
+                            sentence += '!'
+                    else:
+                        # Обычные предложения
+                        if not sentence.endswith(('.', '!', '?')):
+                            sentence += '.'
+                    
+                    processed_sentences.append(sentence)
             
-            return " ".join(processed_chunks)
+            result = " ".join(processed_sentences)
             
-        except Exception as e:
-            self.logger.error(f"Ошибка обработки с моделью: {e}")
-            return self._restore_basic(text)
-    
-    def _process_chunk(self, text: str) -> str:
-        """
-        Обрабатывает один фрагмент текста
-        
-        Args:
-            text: Фрагмент текста
+            # Добавляем запятые в типичных местах
+            result = self._add_commas(result)
             
-        Returns:
-            Обработанный фрагмент
-        """
-        try:
-            # Получаем предсказания модели
-            predictions = self.model(text)
-            
-            # Простая эвристика для восстановления пунктуации
-            # (В идеале здесь должна быть более сложная логика)
-            result = text
-            
-            # Капитализируем первое слово
-            words = result.split()
-            if words:
-                words[0] = words[0].capitalize()
-                result = " ".join(words)
-            
-            # Добавляем точку в конце если её нет
-            if not result.endswith(('.', '!', '?')):
-                result += '.'
+            # Дополнительная обработка
+            result = self._post_process(result)
             
             return result
             
         except Exception as e:
-            self.logger.error(f"Ошибка обработки фрагмента: {e}")
+            self.logger.error(f"Ошибка улучшенной обработки: {e}")
             return self._restore_basic(text)
+    
+    def _add_commas(self, text: str) -> str:
+        """
+        Добавляет запятые в текст
+        
+        Args:
+            text: Текст для обработки
+            
+        Returns:
+            Текст с запятыми
+        """
+        # Простые правила для добавления запятых
+        # Перед союзами "и", "а", "но", "однако"
+        text = re.sub(r'(\w+) (и|а|но|однако) (\w+)', r'\1, \2 \3', text, flags=re.IGNORECASE)
+        
+        # После вводных слов
+        introductory_words = ["например", "конечно", "однако", "итак", "поэтому", "следовательно", "во-первых", "во-вторых"]
+        for word in introductory_words:
+            pattern = r'(\. |\A)(' + word + r') (\w+)'
+            replacement = r'\1\2, \3'
+            text = re.sub(pattern, replacement, text, flags=re.IGNORECASE)
+        
+        # Перед "что", "как", "который" если это подчинительные союзы
+        subordinating_conjunctions = ["что", "как", "который", "когда", "поскольку", "так как"]
+        for conj in subordinating_conjunctions:
+            pattern = r'(\w{4,}) (' + conj + r') (\w+)'
+            replacement = r'\1, \2 \3'
+            text = re.sub(pattern, replacement, text, flags=re.IGNORECASE)
+        
+        return text
     
     def _restore_basic(self, text: str) -> str:
         """
@@ -309,10 +324,17 @@ class PunctuationService:
         # Исправляем двойные пробелы
         text = re.sub(r'\s+', ' ', text)
         
-        # Исправляем пробелы перед знаками препинания
+        # Исправляем пробелы перед знаками препинания, но сохраняем правильные знаки
+        # Убираем пробелы перед знаками препинания
         text = re.sub(r'\s+([.!?,:;])', r'\1', text)
         
-        # Добавляем пробелы после знаков препинания
+        # Добавляем пробелы после знаков препинания, если за ними следует заглавная буква
         text = re.sub(r'([.!?])([А-ЯA-Z])', r'\1 \2', text)
         
-        return text.strip() 
+        # Исправляем случаи с лишними знаками препинания перед вопросительными знаками
+        text = re.sub(r'([.!?])\s*\?', r'?', text)
+        
+        # Исправляем случаи с лишними знаками препинания перед восклицательными знаками
+        text = re.sub(r'([.!?])\s*!', r'!', text)
+        
+        return text.strip()
