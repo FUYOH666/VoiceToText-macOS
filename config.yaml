@@ -13,6 +13,8 @@ models:
     model_name: "DeepPavlov/rubert-base-cased-sentence"
     cache_dir: "./cache/punctuation"
     lazy_load: true
+    mode: "conservative"  # conservative, improved, ml
+    confidence_threshold: 0.7
   
   vad:
     model_path: "silero_vad"

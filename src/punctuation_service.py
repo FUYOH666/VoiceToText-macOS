@@ -1,5 +1,6 @@
 """
-Сервис для восстановления пунктуации и регистра
+УЛУЧШЕННЫЙ сервис для восстановления пунктуации и регистра
+Исправляет проблемы с неправильными вопросительными знаками и запятыми
 """
 
 import logging
@@ -9,11 +10,11 @@ from pathlib import Path
 
 
 class PunctuationService:
-    """Сервис для восстановления пунктуации и регистра в тексте"""
+    """Улучшенный сервис для восстановления пунктуации и регистра в тексте"""
     
     def __init__(self, config: Any):
         """
-        Инициализация сервиса пунктуации
+        Инициализация улучшенного сервиса пунктуации
         
         Args:
             config: Объект конфигурации
@@ -22,8 +23,11 @@ class PunctuationService:
         self.logger = logging.getLogger(__name__)
         self.model = None
         self.tokenizer = None
-        # По умолчанию используем улучшенный метод без ML модели
-        self.logger.info("Инициализация сервиса пунктуации без ML модели")
+        
+        # Режимы работы
+        punctuation_config = config.models.get("punctuation", {})
+        self.mode = punctuation_config.get('mode', 'conservative')
+        self.logger.info(f"Инициализация улучшенного сервиса пунктуации (режим: {self.mode})")
     
     def restore_punctuation(self, text) -> str:
         """
@@ -45,26 +49,71 @@ class PunctuationService:
             if not text.strip():
                 return text
             
-            self.logger.info(f"Восстановление пунктуации для текста длиной "
-                           f"{len(text)} символов")
+            self.logger.info(f"Восстановление пунктуации для текста длиной {len(text)} символов")
             
-            # Используем улучшенный метод пунктуации без ML модели
-            return self._restore_improved(text)
+            # ПРЕДВАРИТЕЛЬНАЯ очистка входного текста от артефактов
+            text = self._pre_clean_text(text)
+            
+            # Выбираем метод в зависимости от режима
+            if self.mode == 'conservative':
+                return self._restore_conservative(text)
+            elif self.mode == 'improved':
+                return self._restore_improved_fixed(text)
+            else:
+                # Fallback на консервативный
+                return self._restore_conservative(text)
                 
         except Exception as e:
             self.logger.error(f"Ошибка восстановления пунктуации: {e}")
             # Возвращаем базовую обработку
-            return self._restore_basic(text)
+            return self._restore_basic_safe(text)
     
-    def _restore_improved(self, text: str) -> str:
+    def _pre_clean_text(self, text: str) -> str:
         """
-        Улучшенное восстановление пунктуации без ML модели
+        ПРЕДВАРИТЕЛЬНАЯ очистка входного текста от артефактов Whisper
+        Исправляет проблемы ДО основной обработки
+        
+        Args:
+            text: Сырой текст от Whisper
+            
+        Returns:
+            Предварительно очищенный текст
+        """
+        # Убираем лишние знаки препинания в начале фрагментов
+        text = re.sub(r'^\s*[.,!?]+\s*', '', text)  # Убираем знаки в начале
+        
+        # Исправляем разорванные слова типа "В. принципе"
+        text = re.sub(r'\b([А-ЯЁ])\.\s+([а-яё])', r'\1 \2', text)
+        
+        # Объединяем короткие фрагменты разделенные точками
+        # "благодаря нашему приложению. в. принципе" → "благодаря нашему приложению в принципе"
+        words = text.split()
+        cleaned_words = []
+        
+        for i, word in enumerate(words):
+            # Если это короткое слово с точкой в конце
+            if len(word) <= 3 and word.endswith('.') and i < len(words) - 1:
+                # И следующее слово начинается с маленькой буквы
+                next_word = words[i + 1] if i + 1 < len(words) else ""
+                if next_word and next_word[0].islower():
+                    # Убираем точку и продолжаем
+                    cleaned_words.append(word[:-1])
+                    continue
+            
+            cleaned_words.append(word)
+        
+        return " ".join(cleaned_words)
+    
+    def _restore_conservative(self, text: str) -> str:
+        """
+        КОНСЕРВАТИВНОЕ восстановление пунктуации
+        Минимальная обработка для максимальной надёжности
         
         Args:
             text: Исходный текст
             
         Returns:
-            Текст с улучшенной пунктуацией
+            Текст с консервативной пунктуацией
         """
         try:
             # Очищаем текст
@@ -73,26 +122,70 @@ class PunctuationService:
             if not result:
                 return result
             
-            # Разбиваем на предложения по логическим паузам и словам
-            sentences = self._split_into_sentences(result)
+            # Разбиваем на предложения по логическим паузам
+            sentences = self._split_into_sentences_safe(result)
             
             processed_sentences = []
-            for i, sentence in enumerate(sentences):
+            for sentence in sentences:
                 sentence = sentence.strip()
                 if sentence:
                     # Капитализируем первую букву
                     sentence = sentence[0].upper() + sentence[1:] if len(sentence) > 1 else sentence.upper()
                     
-                    # Определяем тип предложения по ключевым словам
-                    question_words = ["как", "почему", "когда", "где", "что", "зачем", "кто", "куда", "откуда"]
-                    exclamatory_words = ["стоп", "хватит", "прекрати", "остановись", "ужас", "боже", "вау"]
-                    
-                    if any(word in sentence.lower() for word in question_words) and not any(sentence.lower().startswith(q) for q in question_words):
-                        # Вопросительные предложения (кроме начинающихся с вопросительных слов)
+                    # ИСПРАВЛЕНО: Только очевидные вопросы
+                    if self._is_clear_question(sentence):
                         if not sentence.endswith('?'):
                             sentence += '?'
-                    elif any(word in sentence.lower() for word in exclamatory_words):
-                        # Восклицательные предложения
+                    else:
+                        # Обычные предложения - только точка
+                        if not sentence.endswith(('.', '!', '?')):
+                            sentence += '.'
+                    
+                    processed_sentences.append(sentence)
+            
+            result = " ".join(processed_sentences)
+            
+            # Дополнительная безопасная обработка
+            result = self._post_process_safe(result)
+            
+            return result
+            
+        except Exception as e:
+            self.logger.error(f"Ошибка консервативной обработки: {e}")
+            return self._restore_basic_safe(text)
+    
+    def _restore_improved_fixed(self, text: str) -> str:
+        """
+        ИСПРАВЛЕННОЕ улучшенное восстановление пунктуации
+        
+        Args:
+            text: Исходный текст
+            
+        Returns:
+            Текст с исправленной логикой пунктуации
+        """
+        try:
+            # Очищаем текст
+            result = text.strip()
+            
+            if not result:
+                return result
+            
+            # Разбиваем на предложения
+            sentences = self._split_into_sentences_safe(result)
+            
+            processed_sentences = []
+            for sentence in sentences:
+                sentence = sentence.strip()
+                if sentence:
+                    # Капитализируем первую букву
+                    sentence = sentence[0].upper() + sentence[1:] if len(sentence) > 1 else sentence.upper()
+                    
+                    # ИСПРАВЛЕНО: Правильная логика вопросов
+                    if self._is_clear_question(sentence):
+                        if not sentence.endswith('?'):
+                            sentence += '?'
+                    elif self._is_exclamation(sentence):
                         if not sentence.endswith('!'):
                             sentence += '!'
                     else:
@@ -104,95 +197,119 @@ class PunctuationService:
             
             result = " ".join(processed_sentences)
             
-            # Добавляем запятые в типичных местах
-            result = self._add_commas(result)
+            # ИСПРАВЛЕНО: Безопасная расстановка запятых
+            result = self._add_commas_safe(result)
             
             # Дополнительная обработка
-            result = self._post_process(result)
+            result = self._post_process_safe(result)
             
             return result
             
         except Exception as e:
-            self.logger.error(f"Ошибка улучшенной обработки: {e}")
-            return self._restore_basic(text)
+            self.logger.error(f"Ошибка исправленной обработки: {e}")
+            return self._restore_conservative(text)
     
-    def _add_commas(self, text: str) -> str:
+    def _is_clear_question(self, sentence: str) -> bool:
         """
-        Добавляет запятые в текст
+        ИСПРАВЛЕНО: Определяет является ли предложение вопросом
+        
+        Args:
+            sentence: Предложение для анализа
+            
+        Returns:
+            True если это явно вопрос
+        """
+        sentence_lower = sentence.lower().strip()
+        
+        # Вопросительные слова, которые НАЧИНАЮТ вопрос
+        question_starters = [
+            "как", "что", "кто", "где", "когда", "почему", "зачем", 
+            "куда", "откуда", "какой", "какая", "какое", "какие",
+            "сколько", "чей", "чья", "чьё", "чьи"
+        ]
+        
+        # ИСПРАВЛЕНО: Проверяем только начало предложения
+        for starter in question_starters:
+            if sentence_lower.startswith(starter + " "):
+                return True
+        
+        # Дополнительные паттерны вопросов
+        question_patterns = [
+            r"^а\s+",  # "а что", "а как"
+            r"^неужели\s+",
+            r"^разве\s+",
+            r"^ли\s+",
+            r"^может\s+ли\s+",
+            r"^можно\s+ли\s+"
+        ]
+        
+        for pattern in question_patterns:
+            if re.match(pattern, sentence_lower):
+                return True
+        
+        return False
+    
+    def _is_exclamation(self, sentence: str) -> bool:
+        """
+        Определяет является ли предложение восклицательным
+        
+        Args:
+            sentence: Предложение для анализа
+            
+        Returns:
+            True если это восклицание
+        """
+        sentence_lower = sentence.lower()
+        
+        exclamatory_words = [
+            "стоп", "хватит", "прекрати", "остановись", "ужас", 
+            "боже", "вау", "класс", "супер", "отлично", "браво"
+        ]
+        
+        # Проверяем наличие восклицательных слов
+        for word in exclamatory_words:
+            if word in sentence_lower:
+                return True
+        
+        return False
+    
+    def _add_commas_safe(self, text: str) -> str:
+        """
+        ИСПРАВЛЕНО: Безопасная расстановка запятых
         
         Args:
             text: Текст для обработки
             
         Returns:
-            Текст с запятыми
+            Текст с безопасно расставленными запятыми
         """
-        # Простые правила для добавления запятых
-        # Перед союзами "и", "а", "но", "однако"
-        text = re.sub(r'(\w+) (и|а|но|однако) (\w+)', r'\1, \2 \3', text, flags=re.IGNORECASE)
+        # УБРАНО: агрессивные правила для союзов "и", "а", "но"
         
-        # После вводных слов
-        introductory_words = ["например", "конечно", "однако", "итак", "поэтому", "следовательно", "во-первых", "во-вторых"]
+        # Только безопасные правила после вводных слов
+        introductory_words = [
+            "например", "конечно", "итак", "поэтому", "следовательно",
+            "во-первых", "во-вторых", "в-третьих", "наконец", "кроме того"
+        ]
+        
         for word in introductory_words:
-            pattern = r'(\. |\A)(' + word + r') (\w+)'
+            # Добавляем запятую после вводного слова если её нет
+            pattern = r'(\. |\A)(' + re.escape(word) + r') ([а-яёА-ЯЁ])'
             replacement = r'\1\2, \3'
             text = re.sub(pattern, replacement, text, flags=re.IGNORECASE)
         
-        # Перед "что", "как", "который" если это подчинительные союзы
-        subordinating_conjunctions = ["что", "как", "который", "когда", "поскольку", "так как"]
-        for conj in subordinating_conjunctions:
-            pattern = r'(\w{4,}) (' + conj + r') (\w+)'
-            replacement = r'\1, \2 \3'
+        # Запятая перед "который", "которая", "которое" (относительные местоимения)
+        relative_pronouns = ["который", "которая", "которое", "которые"]
+        for pronoun in relative_pronouns:
+            pattern = r'([а-яёА-ЯЁ]{3,}) (' + pronoun + r') '
+            replacement = r'\1, \2 '
             text = re.sub(pattern, replacement, text, flags=re.IGNORECASE)
         
         return text
     
-    def _restore_basic(self, text: str) -> str:
+    def _split_into_sentences_safe(self, text: str) -> List[str]:
         """
-        Базовое восстановление пунктуации без ML модели
-        
-        Args:
-            text: Исходный текст
-            
-        Returns:
-            Текст с базовой пунктуацией
-        """
-        try:
-            # Очищаем текст
-            result = text.strip()
-            
-            if not result:
-                return result
-            
-            # Разбиваем на предложения по логическим паузам
-            sentences = self._split_into_sentences(result)
-            
-            processed_sentences = []
-            for sentence in sentences:
-                sentence = sentence.strip()
-                if sentence:
-                    # Капитализируем первую букву
-                    sentence = sentence[0].upper() + sentence[1:] if len(sentence) > 1 else sentence.upper()
-                    
-                    # Добавляем точку если её нет
-                    if not sentence.endswith(('.', '!', '?', ',')):
-                        sentence += '.'
-                    
-                    processed_sentences.append(sentence)
-            
-            result = " ".join(processed_sentences)
-            
-            # Дополнительная обработка
-            result = self._post_process(result)
-            
-            return result
-            
-        except Exception as e:
-            self.logger.error(f"Ошибка базовой обработки: {e}")
-            return text
-    
-    def _split_into_sentences(self, text: str) -> List[str]:
-        """
-        Разбивает текст на предложения
+        УЛУЧШЕННОЕ разбиение текста на предложения
+        Объединяет короткие фрагменты, избегает "В. Принципе"
         
         Args:
             text: Исходный текст
@@ -200,14 +317,12 @@ class PunctuationService:
         Returns:
             Список предложений
         """
-        # Ключевые слова для разделения предложений
+        # Простое разделение по ключевым словам и длине
         sentence_breaks = [
-            "и так", "итак", "поэтому", "однако", "тем не менее",
             "во-первых", "во-вторых", "в-третьих", "наконец",
-            "кроме того", "более того", "также"
+            "итак", "поэтому", "однако", "тем не менее"
         ]
         
-        # Простое разделение по длине и ключевым словам
         words = text.split()
         sentences = []
         current_sentence = []
@@ -215,14 +330,15 @@ class PunctuationService:
         for i, word in enumerate(words):
             current_sentence.append(word)
             
-            # Проверяем условия для разделения
+            # УЛУЧШЕНО: более умные условия разделения
             should_break = (
-                len(current_sentence) > 15 or  # Длинное предложение
-                word.lower() in sentence_breaks or  # Ключевое слово
-                (i < len(words) - 1 and words[i + 1].lower() in sentence_breaks)
+                len(current_sentence) > 15 or  # Увеличили лимит
+                (word.lower() in sentence_breaks and len(current_sentence) > 5) or  # Минимум 5 слов
+                (i < len(words) - 1 and words[i + 1].lower() in sentence_breaks and len(current_sentence) > 5)
             )
             
-            if should_break and len(current_sentence) > 3:
+            # НОВОЕ: НЕ разбиваем очень короткие фрагменты (избегаем "В. Принципе")
+            if should_break and len(current_sentence) > 6:  # Минимум 6 слов для разбиения
                 sentences.append(" ".join(current_sentence))
                 current_sentence = []
         
@@ -230,43 +346,20 @@ class PunctuationService:
         if current_sentence:
             sentences.append(" ".join(current_sentence))
         
-        return sentences
-    
-    def _split_text(self, text: str, max_length: int) -> List[str]:
-        """
-        Разбивает текст на фрагменты заданной длины
-        
-        Args:
-            text: Исходный текст
-            max_length: Максимальная длина фрагмента
-            
-        Returns:
-            Список фрагментов
-        """
-        words = text.split()
-        chunks = []
-        current_chunk = []
-        current_length = 0
-        
-        for word in words:
-            word_length = len(word) + 1  # +1 для пробела
-            
-            if current_length + word_length > max_length and current_chunk:
-                chunks.append(" ".join(current_chunk))
-                current_chunk = [word]
-                current_length = word_length
+        # НОВОЕ: Объединяем слишком короткие предложения
+        merged_sentences = []
+        for sentence in sentences:
+            # Если предложение очень короткое (1-2 слова) - объединяем с предыдущим
+            if len(sentence.split()) <= 2 and merged_sentences:
+                merged_sentences[-1] += " " + sentence.lower()
             else:
-                current_chunk.append(word)
-                current_length += word_length
+                merged_sentences.append(sentence)
         
-        if current_chunk:
-            chunks.append(" ".join(current_chunk))
-        
-        return chunks
+        return merged_sentences
     
-    def _post_process(self, text: str) -> str:
+    def _post_process_safe(self, text: str) -> str:
         """
-        Дополнительная обработка текста
+        БЕЗОПАСНАЯ дополнительная обработка текста
         
         Args:
             text: Текст для обработки
@@ -277,17 +370,64 @@ class PunctuationService:
         # Исправляем двойные пробелы
         text = re.sub(r'\s+', ' ', text)
         
-        # Исправляем пробелы перед знаками препинания, но сохраняем правильные знаки
         # Убираем пробелы перед знаками препинания
         text = re.sub(r'\s+([.!?,:;])', r'\1', text)
         
-        # Добавляем пробелы после знаков препинания, если за ними следует заглавная буква
+        # МАКСИМАЛЬНО АГРЕССИВНАЯ очистка дублей (все проблемы пользователя)
+        # Приоритет: ? > ! > . > ,
+        text = re.sub(r'[,!.]*\?', '?', text)       # Любые знаки + ? → только ?
+        text = re.sub(r'[,.]*!(?!\?)', '!', text)   # Любые знаки + ! → только ! (но не !?)
+        text = re.sub(r'![.]', '!', text)           # ! + точка → только !
+        text = re.sub(r'[.]+', '.', text)           # Множественные точки → одна
+        text = re.sub(r'[,]+', ',', text)           # Множественные запятые → одна
+        
+        # Специальные случаи из примеров пользователя
+        text = re.sub(r',\?', '?', text)            # ,? → ?
+        text = re.sub(r'\.\?', '?', text)           # .? → ?
+        text = re.sub(r'!\.$', '!', text)           # !. в конце → !
+        text = re.sub(r',\.$', '.', text)           # ,. в конце → .
+        
+        # Очистка артефактов от пауз
+        text = re.sub(r'\.\s*,', '.', text)         # Точка запятая → точка
+        text = re.sub(r',\s*\.', '.', text)         # Запятая точка → точка
+        
+        # Убираем знаки препинания после коротких слов (В. Принципе → В принципе)
+        text = re.sub(r'\b([А-ЯЁ])\.\s+([а-яё])', r'\1 \2', text)
+        
+        # Добавляем пробелы после знаков препинания
         text = re.sub(r'([.!?])([А-ЯA-Z])', r'\1 \2', text)
         
-        # Исправляем случаи с лишними знаками препинания перед вопросительными знаками
-        text = re.sub(r'([.!?])\s*\?', r'?', text)
+        # ФИНАЛЬНАЯ ОЧИСТКА: убираем все лишние пробелы
+        text = re.sub(r'\s+', ' ', text)  # Множественные пробелы → один пробел
+        text = text.strip()               # Убираем пробелы в начале и конце
         
-        # Исправляем случаи с лишними знаками препинания перед восклицательными знаками
-        text = re.sub(r'([.!?])\s*!', r'!', text)
+        return text
+    
+    def _restore_basic_safe(self, text: str) -> str:
+        """
+        БАЗОВАЯ безопасная обработка в случае ошибок
         
-        return text.strip()
+        Args:
+            text: Исходный текст
+            
+        Returns:
+            Текст с минимальной обработкой
+        """
+        try:
+            result = text.strip()
+            
+            if not result:
+                return result
+            
+            # Только капитализация первой буквы и точка в конце
+            if result:
+                result = result[0].upper() + result[1:] if len(result) > 1 else result.upper()
+                
+                if not result.endswith(('.', '!', '?')):
+                    result += '.'
+            
+            return result
+            
+        except Exception as e:
+            self.logger.error(f"Ошибка базовой обработки: {e}")
+            return text

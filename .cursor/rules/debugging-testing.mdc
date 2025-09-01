@@ -1,0 +1,90 @@
+---
+alwaysApply: false
+description: Debugging and testing guidelines for SuperWhisper
+---
+
+# Отладка и тестирование SuperWhisper
+
+## Логирование
+
+Все модули используют структурированное логирование:
+
+```python
+import logging
+
+class MyService:
+    def __init__(self):
+        self.logger = logging.getLogger(__name__)
+        
+    def process(self):
+        self.logger.info("Начало обработки")
+        try:
+            # код
+            self.logger.debug(f"Промежуточный результат: {result}")
+        except Exception as e:
+            self.logger.error(f"Ошибка обработки: {e}")
+```
+
+## Тесты
+
+### Базовые тесты
+Файл [test_basic.py](mdc:test_basic.py) проверяет:
+- Загрузку конфигурации
+- Инициализацию сервисов
+- Системные требования
+
+### Тест автовставки
+Файл [test_auto_paste.py](mdc:test_auto_paste.py) проверяет работу автоматической вставки.
+
+Запуск тестов:
+```bash
+./venv/bin/python -m pytest -q
+./venv/bin/python test_basic.py
+./venv/bin/python test_auto_paste.py
+```
+
+## Отладка проблем
+
+### Проблемы с записью
+1. Проверьте разрешения микрофона в System Settings
+2. Смотрите логи в консоли - список аудио устройств
+3. Проверьте `audio.sample_rate` в конфиге (должно быть 16000)
+
+### Проблемы с моделями
+1. MLX Whisper - проверьте наличие файлов в `./models/`
+2. VAD/Пунктуация - проверьте кэш в `./cache/`
+3. Ленивая загрузка - модели грузятся при первом использовании
+
+### Проблемы с автовставкой
+1. Проверьте Accessibility разрешения для Python
+2. Включите `auto_paste_force_mode: true` в конфиге
+3. Смотрите логи - показывает активное приложение
+
+### Проблемы с памятью
+1. Используйте пункт меню "Очистить память"
+2. Проверьте настройки `performance.force_garbage_collection`
+3. Смотрите логи для отслеживания использования памяти
+
+## Полезные команды
+
+```bash
+# Запуск с подробными логами
+./venv/bin/python superwhisper.py
+
+# Проверка процессов
+pgrep -f superwhisper.py
+
+# Очистка кэша
+rm -rf ./cache/*
+
+# Проверка моделей
+ls -la ./models/
+```
+
+## Диагностика через логи
+
+Основные сообщения для поиска:
+- `"Запись начата"` - успешное начало записи
+- `"Распознавание завершено"` - результат Whisper
+- `"Автовставка выполнена"` - успешная вставка
+- `"Ошибка"` - любые проблемы

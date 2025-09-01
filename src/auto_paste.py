@@ -57,6 +57,9 @@ class AutoPasteService:
                 self.logger.warning("Пустой текст для вставки")
                 return False
             
+            # ИСПРАВЛЕНИЕ: Убираем ВСЕ лишние пробелы в начале и конце
+            text = text.strip()
+            
             # Проверяем безопасность (если не force режим)
             if not getattr(self, 'force_mode', False):
                 if not self._is_safe_to_paste():
