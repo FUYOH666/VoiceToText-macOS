@@ -62,3 +62,6 @@ test_*.py
 *PLAN.md
 READY_TO_TEST.md
 THREE_SOLUTIONS.md
+GITHUB_READY.md
+.pytest_cache/
+*_temp.py
