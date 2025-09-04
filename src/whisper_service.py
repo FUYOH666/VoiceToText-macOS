@@ -189,7 +189,7 @@ class WhisperService:
     def _resolve_whisper_path(self) -> str:
         """Определяет путь к локальной модели. Ошибку бросает, если модель не найдена."""
         try:
-            cfg = self.config.models.get("whisper", {})
+            cfg = self.config.whisper.get("whisper", {})
             cfg_path = cfg.get("path")
             if cfg_path:
                 p = Path(str(cfg_path))
@@ -219,7 +219,7 @@ class WhisperService:
         """Возвращает путь к локальной модели, если она существует."""
         # 1) Конфиг-значение, если это каталог
         try:
-            cfg = self.config.models.get("whisper", {})
+            cfg = self.config.whisper.get("whisper", {})
             cfg_path = cfg.get("path")
             if cfg_path and Path(str(cfg_path)).exists():
                 return str(Path(str(cfg_path)))

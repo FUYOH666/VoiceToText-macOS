@@ -1,0 +1,42 @@
+{
+  "AI": {
+    "expand": "artificial intelligence",
+    "context": "искусственный интеллект"
+  },
+  "ML": {
+    "expand": "machine learning",
+    "context": "машинное обучение"
+  },
+  "API": {
+    "expand": "application programming interface",
+    "context": "программный интерфейс приложения"
+  },
+  "UI": {
+    "expand": "user interface",
+    "context": "пользовательский интерфейс"
+  },
+  "UX": {
+    "expand": "user experience",
+    "context": "пользовательский опыт"
+  },
+  "CPU": {
+    "expand": "central processing unit",
+    "context": "центральный процессор"
+  },
+  "GPU": {
+    "expand": "graphics processing unit",
+    "context": "графический процессор"
+  },
+  "RAM": {
+    "expand": "random access memory",
+    "context": "оперативная память"
+  },
+  "OS": {
+    "expand": "operating system",
+    "context": "операционная система"
+  },
+  "HTTP": {
+    "expand": "hypertext transfer protocol",
+    "context": "протокол передачи гипертекста"
+  }
+}

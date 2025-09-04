@@ -20,9 +20,10 @@ class AutoPasteService:
         # Настройки из конфига
         self.enabled = True
         self.paste_delay = 0.1  # Задержка перед вставкой
+        self.force_mode = False  # По умолчанию не в force режиме
         self.safe_apps = [
             "com.apple.dt.Xcode",
-            "com.microsoft.VSCode", 
+            "com.microsoft.VSCode",
             "com.apple.TextEdit",
             "com.apple.Notes",
             "com.apple.mail",
@@ -31,7 +32,7 @@ class AutoPasteService:
             "com.apple.Safari",
             "com.google.Chrome"
         ]
-        
+
         if config and hasattr(config, 'ui'):
             self.enabled = config.ui.get('auto_paste_enabled', True)
             self.paste_delay = config.ui.get('auto_paste_delay', 0.1)

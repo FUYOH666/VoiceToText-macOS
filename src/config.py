@@ -69,13 +69,28 @@ class Config:
     
     @property
     def models(self) -> Dict[str, Any]:
-        """Конфигурация моделей"""
-        return self._config["models"]
+        """Конфигурация моделей (для обратной совместимости)"""
+        return self._config.get("models", {})
+
+    @property
+    def whisper(self) -> Dict[str, Any]:
+        """Конфигурация Whisper"""
+        return self._config.get("whisper", {})
     
     @property
     def llm(self) -> Dict[str, Any]:
         """Конфигурация LLM"""
-        return self._config["llm"]
+        return self._config.get("llm", {})
+
+    @property
+    def vocabulary(self) -> Dict[str, Any]:
+        """Конфигурация кастомного словаря"""
+        return self._config.get("vocabulary", {})
+
+    @property
+    def russian(self) -> Dict[str, Any]:
+        """Конфигурация специфики русского языка"""
+        return self._config.get("russian", {})
     
     @property
     def audio(self) -> Dict[str, Any]:

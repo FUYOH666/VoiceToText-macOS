@@ -24,6 +24,7 @@ from src.hotkey_manager import HotkeyManager  # noqa: E402
 from src.auto_paste import AutoPasteService  # noqa: E402
 from src.memory_manager import free_memory, log_process_memory  # noqa: E402
 from src.async_processor import AsyncSpeechProcessor  # noqa: E402
+from src.vocabulary_service import VocabularyService  # noqa: E402 - НОВЫЙ СЕРВИС
 
 
 def setup_logging():
@@ -83,7 +84,10 @@ class SuperWhisperSimple(rumps.App):
             
             # 🔑 ГЛАВНЫЙ СЕРВИС - автовставка
             self.auto_paste_service = AutoPasteService(self.config)
-            
+
+            # 📚 НОВЫЙ СЕРВИС - кастомный словарь
+            self.vocabulary_service = VocabularyService(self.config)
+
             # Async процессор для ускорения
             self.async_processor = AsyncSpeechProcessor(
                 self.whisper_service,
@@ -313,6 +317,10 @@ class SuperWhisperSimple(rumps.App):
             
             # Сохраняем текст
             final_text = text.strip()
+
+            # 📚 ПРИМЕНЯЕМ КАСТОМНЫЙ СЛОВАРЬ
+            final_text = self.vocabulary_service.process_text(final_text)
+
             self.last_text = final_text
             
             # 🎯 ПРОСТАЯ АВТОВСТАВКА

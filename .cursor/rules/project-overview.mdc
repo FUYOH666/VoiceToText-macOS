@@ -5,10 +5,10 @@ description: Overview of SuperWhisper project structure and conventions
 
 # SuperWhisper - Project Overview
 
-SuperWhisper - это локальное приложение для macOS, которое распознает речь и автоматически вставляет текст в активное приложение.
+SuperWhisper - это локальное приложение для macOS с улучшенным распознаванием речи, кастомным словарем и автоматической вставкой текста.
 
 ## 🎯 Цель проекта
-Создать полностью офлайн решение для диктовки без использования облачных API, оптимизированное для Apple Silicon.
+Создать полностью офлайн решение для диктовки с фокусом на русский язык, без использования облачных API, оптимизированное для Apple Silicon.
 
 ## 🏗 Основная архитектура
 
@@ -16,10 +16,11 @@ SuperWhisper - это локальное приложение для macOS, ко
 [superwhisper.py](mdc:superwhisper.py) - основное приложение на базе rumps (меню-бар)
 
 ### Сервисы (src/)
-- [src/whisper_service.py](mdc:src/whisper_service.py) - распознавание речи через MLX Whisper
+- [src/vocabulary_service.py](mdc:src/vocabulary_service.py) - 🆕 кастомный словарь и обработка терминов
+- [src/whisper_service.py](mdc:src/whisper_service.py) - распознавание речи через MLX Whisper Large v3
 - [src/auto_paste.py](mdc:src/auto_paste.py) - автоматическая вставка текста
 - [src/punctuation_service.py](mdc:src/punctuation_service.py) - обработка пунктуации
-- [src/audio_recorder.py](mdc:src/audio_recoder.py) - запись аудио через PyAudio
+- [src/audio_recorder.py](mdc:src/audio_recorder.py) - запись аудио через PyAudio
 - [src/vad_service.py](mdc:src/vad_service.py) - определение голоса (Silero VAD)
 - [src/async_processor.py](mdc:src/async_processor.py) - асинхронная обработка
 - [src/notification_service.py](mdc:src/notification_service.py) - уведомления macOS
@@ -27,8 +28,13 @@ SuperWhisper - это локальное приложение для macOS, ко
 - [src/hotkey_manager.py](mdc:src/hotkey_manager.py) - глобальные горячие клавиши
 - [src/config.py](mdc:src/config.py) - загрузка конфигурации
 
+### Кастомный словарь (vocabulary/)
+- [vocabulary/custom_terms.json](mdc:vocabulary/custom_terms.json) - профессиональные термины
+- [vocabulary/abbreviations.json](mdc:vocabulary/abbreviations.json) - сокращения (AI, ML, API)
+- [vocabulary/names.json](mdc:vocabulary/names.json) - имена, фамилии, специальные слова
+
 ### Конфигурация
-[config.yaml](mdc:config.yaml) - все настройки приложения
+[config.yaml](mdc:config.yaml) - расширенные настройки с поддержкой словаря и русского языка
 
 ## 📋 Ключевые принципы
 
