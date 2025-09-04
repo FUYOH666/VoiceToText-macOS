@@ -61,6 +61,9 @@ class SuperWhisperSimple(rumps.App):
         self.last_text = ""
         self.recording_start_time = None
         self.recording_timer = None
+
+        # Настройки автовставки
+        self.use_clipboard_paste = True  # По умолчанию через буфер обмена
         
         # Инициализация
         self._init_services()
@@ -101,10 +104,26 @@ class SuperWhisperSimple(rumps.App):
             callback=self.toggle_recording
         )
         
+        # Пункт меню для выбора метода вставки
+        self.paste_method_menu = rumps.MenuItem("📋 Метод вставки")
+        self.clipboard_menu_item = rumps.MenuItem(
+            "✅ Через буфер обмена",
+            callback=self.set_paste_method_clipboard
+        )
+        self.typing_menu_item = rumps.MenuItem(
+            "⬜ Прямой ввод",
+            callback=self.set_paste_method_typing
+        )
+
+        self.paste_method_menu.add(self.clipboard_menu_item)
+        self.paste_method_menu.add(self.typing_menu_item)
+
         self.menu = [
             rumps.MenuItem("📍 Статус: Готов", callback=None),
             rumps.separator,
             self.record_menu_item,  # Используем сохранённую ссылку
+            rumps.separator,
+            self.paste_method_menu,  # Меню выбора метода вставки
             rumps.separator,
             rumps.MenuItem("📋 Копировать текст", callback=self.copy_text),
             rumps.MenuItem("📝 Показать текст", callback=self.show_text),
@@ -129,11 +148,25 @@ class SuperWhisperSimple(rumps.App):
         """Обработка Option+Space"""
         if self.is_processing:
             return
-            
+
         if self.is_recording:
             self.stop_recording()
         else:
             self.start_recording()
+
+    def set_paste_method_clipboard(self, _):
+        """Установить метод вставки через буфер обмена"""
+        self.use_clipboard_paste = True
+        self.clipboard_menu_item.title = "✅ Через буфер обмена"
+        self.typing_menu_item.title = "⬜ Прямой ввод"
+        self.logger.info("📋 Метод вставки: через буфер обмена")
+
+    def set_paste_method_typing(self, _):
+        """Установить метод вставки через прямой ввод"""
+        self.use_clipboard_paste = False
+        self.clipboard_menu_item.title = "⬜ Через буфер обмена"
+        self.typing_menu_item.title = "✅ Прямой ввод"
+        self.logger.info("⌨️ Метод вставки: прямой ввод символов")
     
     def _update_status(self, status: str):
         """Обновление статуса в меню"""
@@ -289,8 +322,11 @@ class SuperWhisperSimple(rumps.App):
                 if auto_paste_enabled:
                     self.logger.info(f"📝 Автовставка текста: {len(final_text)} символов")
                     
-                    # Обычная автовставка
-                    success = self.auto_paste_service.paste_text(final_text)
+                    # Обычная автовставка с выбранным методом
+                    success = self.auto_paste_service.paste_text(
+                        final_text,
+                        use_clipboard=self.use_clipboard_paste
+                    )
                     if success:
                         self.logger.info("✅ Автовставка выполнена успешно")
                     else:
