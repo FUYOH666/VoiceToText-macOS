@@ -69,3 +69,6 @@ GITHUB_READY.md
 # Test files (created locally, not in repository)
 test_*.py
 test_basic.py
+
+# Planning documents (created for user convenience)
+SUPERWHISPER_IMPROVEMENT_IDEAS.md
