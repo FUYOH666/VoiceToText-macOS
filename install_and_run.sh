@@ -16,10 +16,10 @@ if [[ "$OSTYPE" != "darwin"* ]]; then
     exit 1
 fi
 
-# Проверка Python 3.11
-if ! python3.11 --version >/dev/null 2>&1; then
-    echo "❌ Требуется Python 3.11"
-    echo "Установите через Homebrew: brew install python@3.11"
+# Проверка Python 3.12
+if ! python3.12 --version >/dev/null 2>&1; then
+    echo "❌ Требуется Python 3.12"
+    echo "Установите через Homebrew: brew install python@3.12"
     exit 1
 fi
 
@@ -27,7 +27,7 @@ fi
 echo "📦 Создание виртуального окружения..."
 if [ ! -d "venv" ]; then
     echo "Создаю новое виртуальное окружение..."
-    python3.11 -m venv venv
+    python3.12 -m venv venv
 fi
 
 # Активация окружения
@@ -82,7 +82,7 @@ echo "🔐 ВАЖНО: Настройка разрешений доступа"
 echo "========================================="
 echo "1. Откройте: System Settings → Privacy & Security → Accessibility"
 echo "2. Нажмите '+' и добавьте:"
-echo "   • Python (/opt/homebrew/bin/python3.11)"
+echo "   • Python (/opt/homebrew/bin/python3.12)"
 echo "   • Terminal (/Applications/Utilities/Terminal.app)"
 echo "3. Поставьте галочки рядом с добавленными приложениями"
 echo ""

@@ -3,7 +3,7 @@
 > Быстрое офлайн распознавание речи с автоматической вставкой текста. Работает без интернета!
 
 ![macOS](https://img.shields.io/badge/macOS-12.0+-blue)
-![Python](https://img.shields.io/badge/Python-3.11+-green)
+![Python](https://img.shields.io/badge/Python-3.12+-green)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
 ## ✨ Особенности

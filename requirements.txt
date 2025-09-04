@@ -1,4 +1,4 @@
-# SuperWhisper Local - Core Dependencies
+# SuperWhisper Local - Core Dependencies (Python 3.12)
 
 # MLX Whisper для распознавания речи
 mlx-whisper>=0.4.2
