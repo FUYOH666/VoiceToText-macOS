@@ -63,8 +63,8 @@ class SuperWhisperSimple(rumps.App):
         self.recording_start_time = None
         self.recording_timer = None
 
-        # Настройки автовставки
-        self.use_clipboard_paste = True  # По умолчанию через буфер обмена
+        # Автовставка всегда через буфер обмена
+        self.use_clipboard_paste = True
         
         # Инициализация
         self._init_services()
@@ -102,38 +102,20 @@ class SuperWhisperSimple(rumps.App):
     
     def _create_menu(self):
         """Создание меню"""
-        # 🛠 Сохраняем ссылку на пункт записи для правильного доступа
         self.record_menu_item = rumps.MenuItem(
-            "🎤 Начать запись", 
+            "🎤 Начать запись",
             callback=self.toggle_recording
         )
-        
-        # Пункт меню для выбора метода вставки
-        self.paste_method_menu = rumps.MenuItem("📋 Метод вставки")
-        self.clipboard_menu_item = rumps.MenuItem(
-            "✅ Через буфер обмена",
-            callback=self.set_paste_method_clipboard
-        )
-        self.typing_menu_item = rumps.MenuItem(
-            "⬜ Прямой ввод",
-            callback=self.set_paste_method_typing
-        )
-
-        self.paste_method_menu.add(self.clipboard_menu_item)
-        self.paste_method_menu.add(self.typing_menu_item)
 
         self.menu = [
             rumps.MenuItem("📍 Статус: Готов", callback=None),
             rumps.separator,
-            self.record_menu_item,  # Используем сохранённую ссылку
-            rumps.separator,
-            self.paste_method_menu,  # Меню выбора метода вставки
+            self.record_menu_item,
             rumps.separator,
             rumps.MenuItem("📋 Копировать текст", callback=self.copy_text),
             rumps.MenuItem("📝 Показать текст", callback=self.show_text),
             rumps.separator,
             rumps.MenuItem("ℹ️ О программе", callback=self.show_about),
-            rumps.MenuItem("🧹 Очистить память", callback=self.manual_cleanup),
         ]
     
     def _start_hotkeys(self):
@@ -158,19 +140,6 @@ class SuperWhisperSimple(rumps.App):
         else:
             self.start_recording()
 
-    def set_paste_method_clipboard(self, _):
-        """Установить метод вставки через буфер обмена"""
-        self.use_clipboard_paste = True
-        self.clipboard_menu_item.title = "✅ Через буфер обмена"
-        self.typing_menu_item.title = "⬜ Прямой ввод"
-        self.logger.info("📋 Метод вставки: через буфер обмена")
-
-    def set_paste_method_typing(self, _):
-        """Установить метод вставки через прямой ввод"""
-        self.use_clipboard_paste = False
-        self.clipboard_menu_item.title = "⬜ Через буфер обмена"
-        self.typing_menu_item.title = "✅ Прямой ввод"
-        self.logger.info("⌨️ Метод вставки: прямой ввод символов")
     
     def _update_status(self, status: str):
         """Обновление статуса в меню"""
@@ -388,19 +357,6 @@ class SuperWhisperSimple(rumps.App):
         except Exception as e:
             self.logger.error(f"Ошибка очистки после обработки: {e}")
 
-    def manual_cleanup(self, _):
-        """Ручная очистка памяти из меню."""
-        try:
-            self.logger.info("Ручная очистка памяти…")
-            if hasattr(self, 'audio_recorder'):
-                self.audio_recorder.cleanup()
-            if hasattr(self, 'async_processor'):
-                self.async_processor._cleanup_memory()
-            free_memory("manual")
-            log_process_memory("after manual cleanup")
-            rumps.alert("Память очищена")
-        except Exception as e:
-            self.logger.error(f"Ошибка ручной очистки: {e}")
     
     @rumps.clicked("📋 Копировать текст")
     def copy_text(self, _):
@@ -436,12 +392,12 @@ class SuperWhisperSimple(rumps.App):
     def show_about(self, _):
         """О программе"""
         rumps.alert(
-            title="SuperWhisper Simple",
-            message=f"v{self.config.app['version']}\n\n"
-                   "🚀 Возможности:\n"
-                   "• Быстрая транскрипция\n"
-                   "• Автоматическая вставка\n"
-                   "• Простота использования\n\n"
+            title="SuperWhisper",
+            message="Локальная диктовка для macOS\n\n"
+                   "🚀 Функции:\n"
+                   "• Распознавание речи через Whisper\n"
+                   "• Автовставка текста\n"
+                   "• Кастомный словарь\n\n"
                    "⌨️ Option+Space - запись/остановка",
             ok="OK"
         )

@@ -100,9 +100,19 @@ class Config:
     @property
     def ui(self) -> Dict[str, Any]:
         """Конфигурация UI"""
-        return self._config["ui"]
-    
+        return self._config.get("ui", {})
+
     @property
     def performance(self) -> Dict[str, Any]:
         """Конфигурация производительности"""
-        return self._config["performance"] 
+        return self._config.get("performance", {})
+
+    @property
+    def debug(self) -> Dict[str, Any]:
+        """Конфигурация отладки"""
+        return self._config.get("debug", {})
+
+    @property
+    def punctuation(self) -> Dict[str, Any]:
+        """Конфигурация пунктуации"""
+        return self._config.get("punctuation", {}) 

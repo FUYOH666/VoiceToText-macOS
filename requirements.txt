@@ -1,29 +1,23 @@
-# SuperWhisper Local - Core Dependencies (Python 3.12)
+# SuperWhisper - Dependencies (Python 3.12)
 
-# MLX Whisper для распознавания речи
+# Core ML
 mlx-whisper>=0.4.2
 numpy>=1.24.0
-
-# PyTorch для ML моделей
 torch>=2.0.0
 torchaudio>=2.0.0
 
-# VAD (Voice Activity Detection)
+# Audio processing
+pyaudio>=0.2.11
 silero-vad>=4.0.0
 
-# Пунктуация и капитализация
+# Text processing
 transformers>=4.30.0
 
-# Аудио обработка
-pyaudio>=0.2.11
-
-# GUI и системная интеграция
-pynput>=1.7.0
+# System integration
 rumps>=0.4.0
+pynput>=1.7.0
 
-# HTTP клиент для LM Studio
-requests>=2.31.0
-
-# Утилиты
+# Utilities
 pyyaml>=6.0
-pyperclip>=1.8.0 
+pyperclip>=1.8.0
+requests>=2.31.0 
