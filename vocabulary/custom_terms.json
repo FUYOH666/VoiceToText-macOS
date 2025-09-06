@@ -1,0 +1,302 @@
+{
+  "технологии": {
+    "variations": ["технологии", "технологий", "технологиям"],
+    "expand": "технологии",
+    "context": "IT"
+  },
+  "разработка": {
+    "variations": ["разработка", "разработкой", "разработке", "разработку"],
+    "expand": "разработка",
+    "context": "development"
+  },
+  "приложение": {
+    "variations": ["приложение", "приложением", "приложении"],
+    "expand": "приложение",
+    "context": "app"
+  },
+  "пользователь": {
+    "variations": ["пользователь", "пользователя", "пользователем", "пользователи"],
+    "expand": "пользователь",
+    "context": "user"
+  },
+  "сервис": {
+    "variations": ["сервис", "сервиса", "сервисом", "сервисы"],
+    "expand": "сервис",
+    "context": "service"
+  },
+  "алгоритм": {
+    "variations": ["алгоритм", "алгоритма", "алгоритмом", "алгоритмы"],
+    "expand": "алгоритм",
+    "context": "algorithm"
+  },
+  "данные": {
+    "variations": ["данные", "данных", "данными"],
+    "expand": "данные",
+    "context": "data"
+  },
+  "система": {
+    "variations": ["система", "системой", "системе", "системы"],
+    "expand": "система",
+    "context": "system"
+  },
+  "инсайты": {
+    "variations": ["инсайты", "инсайтов", "инсайтам"],
+    "expand": "инсайты",
+    "context": "insights"
+  },
+  "дозвон": {
+    "variations": ["дозвон", "дозвона", "дозвоном"],
+    "expand": "дозвон",
+    "context": "call completion"
+  },
+  "коллтрекинг": {
+    "variations": ["коллтрекинг", "коллтрекинга", "коллтрекингу"],
+    "expand": "коллтрекинг",
+    "context": "call tracking"
+  },
+  "пилот": {
+    "variations": ["пилот", "пилота", "пилотом", "пилоты"],
+    "expand": "пилот",
+    "context": "pilot"
+  },
+  "пилоты": {
+    "variations": ["пилоты", "пилотов", "пилотам"],
+    "expand": "пилоты",
+    "context": "pilots"
+  },
+  "бренд": {
+    "variations": ["бренд", "бренда", "брендом", "бренды"],
+    "expand": "бренд",
+    "context": "brand"
+  },
+  "клиент": {
+    "variations": ["клиент", "клиента", "клиентом", "клиенты"],
+    "expand": "клиент",
+    "context": "client"
+  },
+  "продукт": {
+    "variations": ["продукт", "продукта", "продуктом", "продукты"],
+    "expand": "продукт",
+    "context": "product"
+  },
+  "решение": {
+    "variations": ["решение", "решения", "решением", "решения"],
+    "expand": "решение",
+    "context": "solution"
+  },
+  "проект": {
+    "variations": ["проект", "проекта", "проектом", "проекты"],
+    "expand": "проект",
+    "context": "project"
+  },
+  "команда": {
+    "variations": ["команда", "команды", "командой", "команды"],
+    "expand": "команда",
+    "context": "team"
+  },
+  "аналитика": {
+    "variations": ["аналитика", "аналитики", "аналитикой"],
+    "expand": "аналитика",
+    "context": "analytics"
+  },
+  "отчет": {
+    "variations": ["отчет", "отчета", "отчетом", "отчеты"],
+    "expand": "отчет",
+    "context": "report"
+  },
+  "метрика": {
+    "variations": ["метрика", "метрики", "метрикой", "метрики"],
+    "expand": "метрика",
+    "context": "metric"
+  },
+  "конверсия": {
+    "variations": ["конверсия", "конверсии", "конверсией"],
+    "expand": "конверсия",
+    "context": "conversion"
+  },
+  "эффективность": {
+    "variations": ["эффективность", "эффективности", "эффективностью"],
+    "expand": "эффективность",
+    "context": "efficiency"
+  },
+  "оптимизация": {
+    "variations": ["оптимизация", "оптимизации", "оптимизацией"],
+    "expand": "оптимизация",
+    "context": "optimization"
+  },
+  "автоматизация": {
+    "variations": ["автоматизация", "автоматизации", "автоматизацией"],
+    "expand": "автоматизация",
+    "context": "automation"
+  },
+  "интеграция": {
+    "variations": ["интеграция", "интеграции", "интеграцией"],
+    "expand": "интеграция",
+    "context": "integration"
+  },
+  "масштабирование": {
+    "variations": ["масштабирование", "масштабирования", "масштабированием"],
+    "expand": "масштабирование",
+    "context": "scaling"
+  },
+  "мониторинг": {
+    "variations": ["мониторинг", "мониторинга", "мониторингом"],
+    "expand": "мониторинг",
+    "context": "monitoring"
+  },
+  "логирование": {
+    "variations": ["логирование", "логирования", "логированием"],
+    "expand": "логирование",
+    "context": "logging"
+  },
+  "кэширование": {
+    "variations": ["кэширование", "кэширования", "кэшированием"],
+    "expand": "кэширование",
+    "context": "caching"
+  },
+  "балансировка": {
+    "variations": ["балансировка", "балансировки", "балансировкой"],
+    "expand": "балансировка",
+    "context": "load balancing"
+  },
+  "резервное копирование": {
+    "variations": ["резервное копирование", "бэкап", "backup"],
+    "expand": "резервное копирование",
+    "context": "backup"
+  },
+  "восстановление": {
+    "variations": ["восстановление", "восстановления", "восстановлением"],
+    "expand": "восстановление",
+    "context": "recovery"
+  },
+  "миграция": {
+    "variations": ["миграция", "миграции", "миграцией"],
+    "expand": "миграция",
+    "context": "migration"
+  },
+  "деплой": {
+    "variations": ["деплой", "деплоя", "деплоймент"],
+    "expand": "деплой",
+    "context": "deployment"
+  },
+  "релиз": {
+    "variations": ["релиз", "релиза", "релизом", "релизы"],
+    "expand": "релиз",
+    "context": "release"
+  },
+  "версия": {
+    "variations": ["версия", "версии", "версией", "версии"],
+    "expand": "версия",
+    "context": "version"
+  },
+  "обновление": {
+    "variations": ["обновление", "обновления", "обновлением", "обновления"],
+    "expand": "обновление",
+    "context": "update"
+  },
+  "патч": {
+    "variations": ["патч", "патча", "патчем", "патчи"],
+    "expand": "патч",
+    "context": "patch"
+  },
+  "фикс": {
+    "variations": ["фикс", "фикса", "фиксом", "фиксы"],
+    "expand": "фикс",
+    "context": "fix"
+  },
+  "баг": {
+    "variations": ["баг", "бага", "багом", "баги"],
+    "expand": "баг",
+    "context": "bug"
+  },
+  "фича": {
+    "variations": ["фича", "фичи", "фичей", "фичи"],
+    "expand": "фича",
+    "context": "feature"
+  },
+  "спецификация": {
+    "variations": ["спецификация", "спецификации", "спецификацией"],
+    "expand": "спецификация",
+    "context": "specification"
+  },
+  "документация": {
+    "variations": ["документация", "документации", "документацией"],
+    "expand": "документация",
+    "context": "documentation"
+  },
+  "тестирование": {
+    "variations": ["тестирование", "тестирования", "тестированием"],
+    "expand": "тестирование",
+    "context": "testing"
+  },
+  "qa": {
+    "variations": ["qa", "quality assurance"],
+    "expand": "QA",
+    "context": "quality assurance"
+  },
+  "ci": {
+    "variations": ["ci", "continuous integration"],
+    "expand": "CI",
+    "context": "continuous integration"
+  },
+  "cd": {
+    "variations": ["cd", "continuous delivery"],
+    "expand": "CD",
+    "context": "continuous delivery"
+  },
+  "gitignore": {
+    "variations": ["gitignore", "гид игнор", "кит игнор", "git ignore"],
+    "expand": ".gitignore",
+    "context": "git ignore file"
+  },
+  "readme": {
+    "variations": ["readme", "redmi", "read me", "ридми"],
+    "expand": "README.md",
+    "context": "readme file"
+  },
+  "короче говоря": {
+    "variations": ["короче говоря", "короче сказать"],
+    "expand": "проще сказать",
+    "context": "phrase replacement"
+  },
+  "в общем": {
+    "variations": ["в общем", "в общем-то"],
+    "expand": "",
+    "context": "filler phrase removal"
+  },
+  "как бы": {
+    "variations": ["как бы", "как-бы"],
+    "expand": "",
+    "context": "filler phrase removal"
+  },
+  "типа": {
+    "variations": ["типа", "типа того"],
+    "expand": "",
+    "context": "filler word removal"
+  },
+  "ну": {
+    "variations": ["ну", "ну вот"],
+    "expand": "",
+    "context": "filler word removal"
+  },
+  "вот": {
+    "variations": ["вот", "вот так"],
+    "expand": "",
+    "context": "filler word removal"
+  },
+  "эээ": {
+    "variations": ["эээ", "э-э-э", "ммм"],
+    "expand": "",
+    "context": "hesitation sound removal"
+  },
+  "слушай": {
+    "variations": ["слушай", "послушай"],
+    "expand": "",
+    "context": "address removal"
+  },
+  "смотри": {
+    "variations": ["смотри", "посмотри"],
+    "expand": "",
+    "context": "address removal"
+  }
+}

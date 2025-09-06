@@ -1,0 +1,490 @@
+{
+  "AI": {
+    "expand": "artificial intelligence",
+    "context": "искусственный интеллект"
+  },
+  "ML": {
+    "expand": "machine learning",
+    "context": "машинное обучение"
+  },
+  "API": {
+    "expand": "application programming interface",
+    "context": "программный интерфейс приложения"
+  },
+  "UI": {
+    "expand": "user interface",
+    "context": "пользовательский интерфейс"
+  },
+  "UX": {
+    "expand": "user experience",
+    "context": "пользовательский опыт"
+  },
+  "CPU": {
+    "expand": "central processing unit",
+    "context": "центральный процессор"
+  },
+  "GPU": {
+    "expand": "graphics processing unit",
+    "context": "графический процессор"
+  },
+  "RAM": {
+    "expand": "random access memory",
+    "context": "оперативная память"
+  },
+  "OS": {
+    "expand": "operating system",
+    "context": "операционная система"
+  },
+  "HTTP": {
+    "expand": "hypertext transfer protocol",
+    "context": "протокол передачи гипертекста"
+  },
+  "I2BF": {
+    "expand": "I2BF",
+    "context": "I2BF"
+  },
+  "PDPA": {
+    "expand": "PDPA",
+    "context": "PDPA"
+  },
+  "VC": {
+    "expand": "venture capital",
+    "context": "венчурный капитал"
+  },
+  "MVP": {
+    "expand": "minimum viable product",
+    "context": "минимальный жизнеспособный продукт"
+  },
+  "SLA": {
+    "expand": "service level agreement",
+    "context": "соглашение об уровне обслуживания"
+  },
+  "SLO": {
+    "expand": "service level objective",
+    "context": "цель уровня обслуживания"
+  },
+  "B2B": {
+    "expand": "business to business",
+    "context": "бизнес для бизнеса"
+  },
+  "B2C": {
+    "expand": "business to consumer",
+    "context": "бизнес для потребителя"
+  },
+  "SaaS": {
+    "expand": "software as a service",
+    "context": "программное обеспечение как услуга"
+  },
+  "PaaS": {
+    "expand": "platform as a service",
+    "context": "платформа как услуга"
+  },
+  "IaaS": {
+    "expand": "infrastructure as a service",
+    "context": "инфраструктура как услуга"
+  },
+  "CTO": {
+    "expand": "chief technology officer",
+    "context": "технический директор"
+  },
+  "CEO": {
+    "expand": "chief executive officer",
+    "context": "генеральный директор"
+  },
+  "CMO": {
+    "expand": "chief marketing officer",
+    "context": "директор по маркетингу"
+  },
+  "HR": {
+    "expand": "human resources",
+    "context": "человеческие ресурсы"
+  },
+  "KPI": {
+    "expand": "key performance indicator",
+    "context": "ключевой показатель эффективности"
+  },
+  "ROI": {
+    "expand": "return on investment",
+    "context": "возврат на инвестиции"
+  },
+  "CAC": {
+    "expand": "customer acquisition cost",
+    "context": "стоимость привлечения клиента"
+  },
+  "LTV": {
+    "expand": "lifetime value",
+    "context": "пожизненная ценность клиента"
+  },
+  "CRM": {
+    "expand": "customer relationship management",
+    "context": "управление отношениями с клиентами"
+  },
+  "ERP": {
+    "expand": "enterprise resource planning",
+    "context": "планирование ресурсов предприятия"
+  },
+  "IoT": {
+    "expand": "internet of things",
+    "context": "интернет вещей"
+  },
+  "BigData": {
+    "expand": "big data",
+    "context": "большие данные"
+  },
+  "DevOps": {
+    "expand": "development operations",
+    "context": "разработка и эксплуатация"
+  },
+  "CI/CD": {
+    "expand": "continuous integration/continuous delivery",
+    "context": "непрерывная интеграция/непрерывная доставка"
+  },
+  "Agile": {
+    "expand": "agile",
+    "context": "гибкая методология разработки"
+  },
+  "Scrum": {
+    "expand": "scrum",
+    "context": "скрам"
+  },
+  "Kanban": {
+    "expand": "kanban",
+    "context": "канбан"
+  },
+  "SQL": {
+    "expand": "structured query language",
+    "context": "структурированный язык запросов"
+  },
+  "NoSQL": {
+    "expand": "not only SQL",
+    "context": "не только SQL"
+  },
+  "REST": {
+    "expand": "representational state transfer",
+    "context": "передача состояния представления"
+  },
+  "GraphQL": {
+    "expand": "GraphQL",
+    "context": "GraphQL"
+  },
+  "JWT": {
+    "expand": "JSON Web Token",
+    "context": "веб-токен JSON"
+  },
+  "OAuth": {
+    "expand": "open authorization",
+    "context": "открытая авторизация"
+  },
+  "VPN": {
+    "expand": "virtual private network",
+    "context": "виртуальная частная сеть"
+  },
+  "DNS": {
+    "expand": "domain name system",
+    "context": "система доменных имен"
+  },
+  "CDN": {
+    "expand": "content delivery network",
+    "context": "сеть доставки контента"
+  },
+  "SEO": {
+    "expand": "search engine optimization",
+    "context": "оптимизация для поисковых систем"
+  },
+  "SEM": {
+    "expand": "search engine marketing",
+    "context": "маркетинг в поисковых системах"
+  },
+  "PPC": {
+    "expand": "pay per click",
+    "context": "плата за клик"
+  },
+  "CPA": {
+    "expand": "cost per action",
+    "context": "стоимость за действие"
+  },
+  "CPC": {
+    "expand": "cost per click",
+    "context": "стоимость за клик"
+  },
+  "CTR": {
+    "expand": "click-through rate",
+    "context": "рейтинг кликов"
+  },
+  "ARPU": {
+    "expand": "average revenue per user",
+    "context": "средний доход на пользователя"
+  },
+  "DAU": {
+    "expand": "daily active users",
+    "context": "ежедневно активные пользователи"
+  },
+  "MAU": {
+    "expand": "monthly active users",
+    "context": "ежемесячно активные пользователи"
+  },
+  "WAU": {
+    "expand": "weekly active users",
+    "context": "еженедельно активные пользователи"
+  },
+  "GMV": {
+    "expand": "gross merchandise value",
+    "context": "валовая стоимость товаров"
+  },
+  "NPS": {
+    "expand": "net promoter score",
+    "context": "индекс потребительской лояльности"
+  },
+  "CSAT": {
+    "expand": "customer satisfaction",
+    "context": "удовлетворенность клиентов"
+  },
+  "Churn": {
+    "expand": "churn rate",
+    "context": "коэффициент оттока"
+  },
+  "Funnel": {
+    "expand": "sales funnel",
+    "context": "воронка продаж"
+  },
+  "Lead": {
+    "expand": "lead",
+    "context": "лид"
+  },
+  "Pipeline": {
+    "expand": "sales pipeline",
+    "context": "воронка продаж"
+  },
+  "Pitch": {
+    "expand": "pitch",
+    "context": "презентация"
+  },
+  "Deck": {
+    "expand": "presentation deck",
+    "context": "презентационная колода"
+  },
+  "Roadmap": {
+    "expand": "product roadmap",
+    "context": "дорожная карта продукта"
+  },
+  "Backlog": {
+    "expand": "product backlog",
+    "context": "бэклог продукта"
+  },
+  "Sprint": {
+    "expand": "sprint",
+    "context": "спринт"
+  },
+  "Retrospective": {
+    "expand": "sprint retrospective",
+    "context": "ретроспектива спринта"
+  },
+  "Standup": {
+    "expand": "daily standup",
+    "context": "ежедневный стендап"
+  },
+  "Burnout": {
+    "expand": "burnout",
+    "context": "выгорание"
+  },
+  "Work-life": {
+    "expand": "work-life balance",
+    "context": "баланс работы и жизни"
+  },
+  "Freelance": {
+    "expand": "freelance",
+    "context": "фриланс"
+  },
+  "Gig": {
+    "expand": "gig economy",
+    "context": "гиг-экономика"
+  },
+  "Startup": {
+    "expand": "startup",
+    "context": "стартап"
+  },
+  "Scaleup": {
+    "expand": "scaleup",
+    "context": "скейлап"
+  },
+  "Unicorn": {
+    "expand": "unicorn",
+    "context": "единорог"
+  },
+  "Decacorn": {
+    "expand": "decacorn",
+    "context": "декакорн"
+  },
+  "IPO": {
+    "expand": "initial public offering",
+    "context": "первичное публичное размещение"
+  },
+  "ICO": {
+    "expand": "initial coin offering",
+    "context": "первичное размещение монет"
+  },
+  "NFT": {
+    "expand": "non-fungible token",
+    "context": "невзаимозаменяемый токен"
+  },
+  "DeFi": {
+    "expand": "decentralized finance",
+    "context": "децентрализованные финансы"
+  },
+  "DAO": {
+    "expand": "decentralized autonomous organization",
+    "context": "децентрализованная автономная организация"
+  },
+  "Web3": {
+    "expand": "web3",
+    "context": "веб3"
+  },
+  "Metaverse": {
+    "expand": "metaverse",
+    "context": "метавселенная"
+  },
+  "VR": {
+    "expand": "virtual reality",
+    "context": "виртуальная реальность"
+  },
+  "AR": {
+    "expand": "augmented reality",
+    "context": "дополненная реальность"
+  },
+  "MR": {
+    "expand": "mixed reality",
+    "context": "смешанная реальность"
+  },
+  "Blockchain": {
+    "expand": "blockchain",
+    "context": "блокчейн"
+  },
+  "Crypto": {
+    "expand": "cryptocurrency",
+    "context": "криптовалюта"
+  },
+  "Token": {
+    "expand": "token",
+    "context": "токен"
+  },
+  "Wallet": {
+    "expand": "digital wallet",
+    "context": "цифровой кошелек"
+  },
+  "Mining": {
+    "expand": "mining",
+    "context": "майнинг"
+  },
+  "Staking": {
+    "expand": "staking",
+    "context": "стейкинг"
+  },
+  "Yield": {
+    "expand": "yield farming",
+    "context": "фермерство доходности"
+  },
+  "Liquidity": {
+    "expand": "liquidity pool",
+    "context": "пул ликвидности"
+  },
+  "DEX": {
+    "expand": "decentralized exchange",
+    "context": "децентрализованная биржа"
+  },
+  "CEX": {
+    "expand": "centralized exchange",
+    "context": "централизованная биржа"
+  },
+  "MLX": {
+    "expand": "MLX",
+    "context": "Apple MLX framework"
+  },
+  "Whisper": {
+    "expand": "Whisper",
+    "context": "OpenAI Whisper model"
+  },
+  "VTT": {
+    "expand": "VoiceToText",
+    "context": "Voice To Text"
+  },
+  "ASR": {
+    "expand": "Automatic Speech Recognition",
+    "context": "автоматическое распознавание речи"
+  },
+  "NLP": {
+    "expand": "Natural Language Processing",
+    "context": "обработка естественного языка"
+  },
+  "LLM": {
+    "expand": "Large Language Model",
+    "context": "большая языковая модель"
+  },
+  "API": {
+    "expand": "Application Programming Interface",
+    "context": "программный интерфейс приложения"
+  },
+  "SDK": {
+    "expand": "Software Development Kit",
+    "context": "комплект разработки программного обеспечения"
+  },
+  "IDE": {
+    "expand": "Integrated Development Environment",
+    "context": "интегрированная среда разработки"
+  },
+  "GUI": {
+    "expand": "Graphical User Interface",
+    "context": "графический пользовательский интерфейс"
+  },
+  "CLI": {
+    "expand": "Command Line Interface",
+    "context": "интерфейс командной строки"
+  },
+  "HTTP": {
+    "expand": "HyperText Transfer Protocol",
+    "context": "протокол передачи гипертекста"
+  },
+  "HTTPS": {
+    "expand": "HyperText Transfer Protocol Secure",
+    "context": "защищенный протокол передачи гипертекста"
+  },
+  "JSON": {
+    "expand": "JavaScript Object Notation",
+    "context": "формат обмена данными"
+  },
+  "XML": {
+    "expand": "eXtensible Markup Language",
+    "context": "расширяемый язык разметки"
+  },
+  "YAML": {
+    "expand": "YAML Ain't Markup Language",
+    "context": "формат конфигурационных файлов"
+  },
+  "SQL": {
+    "expand": "Structured Query Language",
+    "context": "язык структурированных запросов"
+  },
+  "NoSQL": {
+    "expand": "Not Only SQL",
+    "context": "не только SQL"
+  },
+  "CRUD": {
+    "expand": "Create, Read, Update, Delete",
+    "context": "операции с данными"
+  },
+  "REST": {
+    "expand": "Representational State Transfer",
+    "context": "архитектурный стиль"
+  },
+  "GraphQL": {
+    "expand": "Graph Query Language",
+    "context": "язык запросов к графу"
+  },
+  "JWT": {
+    "expand": "JSON Web Token",
+    "context": "токен веб аутентификации"
+  },
+  "OAuth": {
+    "expand": "Open Authorization",
+    "context": "открытый протокол авторизации"
+  }
+}

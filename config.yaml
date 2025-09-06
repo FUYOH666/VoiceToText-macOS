@@ -1,0 +1,72 @@
+# VTT (VoiceToText) - Конфигурация
+# Локальная диктовка для macOS
+
+app:
+  version: "2.0"
+  name: "VTT (VoiceToText)"
+
+ui:
+  auto_paste_enabled: true
+  auto_paste_delay: 0.1
+  auto_paste_force_mode: true  # 🆕 Принудительная вставка в любые приложения
+
+audio:
+  sample_rate: 16000
+  max_recording_duration: 300
+  vad_threshold: 0.5
+  streaming:
+    enabled: true
+    chunk_duration: 5.0
+    chunk_overlap: 0.5
+    min_speech_duration: 0.25
+    min_silence_duration: 0.1
+
+whisper:
+  model_name: "mlx-community/whisper-large-v3"
+  language: "ru"
+  task: "transcribe"
+  device: "cpu"
+  decoder_stability:
+    temperature: 0.0
+    # beam_size: 5  # MLX Whisper не поддерживает beam search, используем temperature-based sampling
+    no_speech_threshold: 0.6
+    condition_on_previous_text: true
+
+punctuation:
+  enabled: true
+  mode: "simple"
+  cache_dir: "./cache/punctuation"
+
+vocabulary:
+  enabled: true
+  custom_terms_file: "./vocabulary/custom_terms.json"
+  abbreviations_file: "./vocabulary/abbreviations.json"
+  names_file: "./vocabulary/names.json"
+  expand_abbreviations: true
+  capitalize_names: true
+  handle_compound_words: true
+
+debloat:
+  enabled: true
+  aggressive_mode: false
+  remove_fillers: true
+  remove_echo_repeats: true
+  quiet_mode: true  # Тихий режим для личного использования
+
+numbers:
+  enabled: true
+  format_numbers: true
+  format_percentages: true
+  format_ranges: true
+  format_units: true
+  quiet_mode: true  # Тихий режим для личного использования
+
+performance:
+  force_garbage_collection: true
+  clear_model_cache_after_use: true  # 🆕 Очистка MLX кэша после каждой транскрипции
+  memory_limit_mb: 1024
+  log_memory_usage: true  # 🆕 Логирование использования памяти
+
+debug:
+  enable_detailed_logs: true
+  log_level: "INFO"
