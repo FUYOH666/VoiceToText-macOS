@@ -20,15 +20,9 @@ class AsyncSpeechProcessor:
         self.whisper_service = whisper_service
         self.punctuation_service = punctuation_service
         
-        # 🆕 Ограничиваем количество потоков из конфигурации
-        config_workers = getattr(whisper_service, 'config', None)
-        if config_workers and hasattr(config_workers, 'performance'):
-            max_workers = config_workers.performance.get(
-                'max_concurrent_threads', max_workers
-            )
-        
-        self.executor = ThreadPoolExecutor(max_workers=max_workers, thread_name_prefix="sw-worker")
-        self.logger.info(f"AsyncSpeechProcessor с {max_workers} потоками")
+        # 🆕 Убираем ThreadPoolExecutor для избежания конфликтов semaphore
+        # Основная обработка будет происходить через asyncio
+        self.logger.info("AsyncSpeechProcessor инициализирован (без ThreadPoolExecutor)")
         
     async def process_audio_parallel(
         self, 
@@ -91,7 +85,7 @@ class AsyncSpeechProcessor:
                 self.logger.error(f"Ошибка Whisper: {e}")
                 return ""
         
-        return await loop.run_in_executor(self.executor, transcribe)
+        return await loop.run_in_executor(None, transcribe)
     
     async def _async_punctuation(self, text: str) -> str:
         """Асинхронная обработка пунктуации"""
@@ -104,7 +98,7 @@ class AsyncSpeechProcessor:
                 self.logger.error(f"Ошибка восстановления пунктуации: {e}")
                 return text
         
-        return await loop.run_in_executor(self.executor, restore_punctuation)
+        return await loop.run_in_executor(None, restore_punctuation)
     
     def _cleanup_memory(self):
         """🆕 Принудительная очистка памяти после обработки"""
@@ -115,7 +109,7 @@ class AsyncSpeechProcessor:
             self.logger.error(f"Ошибка очистки памяти AsyncProcessor: {e}")
     
     def process_audio_sync(
-        self, 
+        self,
         audio_data: np.ndarray,
         progress_callback: Optional[Callable[[str], None]] = None
     ) -> Tuple[str, Optional[str]]:
@@ -123,44 +117,21 @@ class AsyncSpeechProcessor:
         Синхронная обертка для async обработки
         Используется из основного приложения
         """
-        # 🆕 Правильное управление event loop
-        loop = None
+        # 🆕 Упрощенная синхронная обработка без лишних ThreadPoolExecutor
         try:
-            # Пробуем получить текущий loop
+            # Создаем новый event loop для безопасной работы
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
             try:
-                loop = asyncio.get_running_loop()
-                # Если loop уже запущен, используем новый поток
-                import concurrent.futures
-                with concurrent.futures.ThreadPoolExecutor() as executor:
-                    future = executor.submit(self._run_in_new_loop, 
-                                           audio_data, progress_callback)
-                    return future.result()
-            except RuntimeError:
-                # Нет запущенного loop, создаем новый
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
                 return loop.run_until_complete(
                     self.process_audio_parallel(audio_data, progress_callback)
                 )
-        except Exception as e:
-            self.logger.error(f"Ошибка синхронной обработки: {e}")
-            return "", None
-        finally:
-            # 🆕 Правильная очистка loop
-            if loop and not loop.is_running():
+            finally:
+                # Гарантированная очистка
                 try:
                     loop.close()
                 except Exception:
                     pass
-    
-    def _run_in_new_loop(self, audio_data: np.ndarray,
-                        progress_callback: Optional[Callable] = None):
-        """Запуск в новом event loop (для threading)"""
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        try:
-            return loop.run_until_complete(
-                self.process_audio_parallel(audio_data, progress_callback)
-            )
-        finally:
-            loop.close()
+        except Exception as e:
+            self.logger.error(f"Ошибка синхронной обработки: {e}")
+            return "", None
