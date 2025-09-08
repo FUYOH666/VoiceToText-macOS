@@ -20,21 +20,8 @@
 
 ## 🚀 Установка
 
-### 1. Скачайте модель Whisper
-```bash
-# Активируйте виртуальное окружение
-source venv/bin/activate
-
-# Скачайте модель (3GB)
-python -c "
-from huggingface_hub import snapshot_download
-snapshot_download(
-    repo_id='mlx-community/whisper-large-v3-mlx',
-    local_dir='./models',
-    local_dir_use_symlinks=False
-)
-"
-```
+### 1. Модель Whisper
+✅ **Модель уже включена в репозиторий!** (3GB, MLX Whisper для Apple Silicon)
 
 ### 2. Запуск
 ```bash

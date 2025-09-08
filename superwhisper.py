@@ -101,7 +101,8 @@ class VTTApp(rumps.App):
             # Async процессор для ускорения
             self.async_processor = AsyncSpeechProcessor(
                 self.whisper_service,
-                self.punctuation_service
+                self.punctuation_service,
+                self.config
             )
             
             self.logger.info("Все сервисы инициализированы")

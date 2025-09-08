@@ -12,7 +12,7 @@ ui:
 
 audio:
   sample_rate: 16000
-  max_recording_duration: 300
+  max_recording_duration: 1800  # Увеличено до 30 минут
   vad_threshold: 0.5
   streaming:
     enabled: true
@@ -64,8 +64,12 @@ numbers:
 performance:
   force_garbage_collection: true
   clear_model_cache_after_use: true  # 🆕 Очистка MLX кэша после каждой транскрипции
-  memory_limit_mb: 1024
+  memory_limit_mb: 2048  # Увеличено для длинных записей
   log_memory_usage: true  # 🆕 Логирование использования памяти
+  chunk_processing:
+    enabled: true  # Включена чанковая обработка
+    max_chunk_duration_sec: 300  # Максимум 5 минут на чанк
+    chunk_overlap_sec: 5  # 5 секунд перекрытия между чанками
 
 debug:
   enable_detailed_logs: true
