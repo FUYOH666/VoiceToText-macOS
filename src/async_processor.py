@@ -22,12 +22,17 @@ class AsyncSpeechProcessor:
         # Параметры для обработки длинных записей из конфигурации
         chunk_config = config.performance.get("chunk_processing", {})
         self.chunk_enabled = chunk_config.get("enabled", True)
-        self.chunk_duration_sec = chunk_config.get("max_chunk_duration_sec", 300)
-        self.chunk_overlap_sec = chunk_config.get("chunk_overlap_sec", 5)
+        self.chunk_threshold_sec = chunk_config.get("chunk_threshold_sec", 60)  # Порог включения чанков
+        self.chunk_duration_sec = chunk_config.get("max_chunk_duration_sec", 30)  # Размер чанка
+        self.chunk_overlap_sec = chunk_config.get("chunk_overlap_sec", 1)  # Перекрытие
         self.max_memory_mb = config.performance.get("memory_limit_mb", 1024)
 
-        self.logger.info(f"SpeechProcessor инициализирован (синхронный режим, чанки: {self.chunk_enabled})")
-        self.logger.info(f"Параметры чанков: {self.chunk_duration_sec}сек, перекрытие {self.chunk_overlap_sec}сек")
+        # Оптимизация: отключаем тяжелые операции для коротких записей
+        self.force_gc = config.performance.get("force_garbage_collection", False)
+        self.clear_cache = config.performance.get("clear_model_cache_after_use", False)
+
+        self.logger.info(f"SpeechProcessor инициализирован (быстрый режим)")
+        self.logger.info(f"Чанки включаются для файлов >{self.chunk_threshold_sec}сек")
 
     def process_audio_parallel(
         self,
@@ -51,13 +56,13 @@ class AsyncSpeechProcessor:
             duration_sec = len(audio_data) / 16000
             self.logger.info(f"Длительность аудио: {duration_sec:.1f} секунд")
 
-            # Проверяем, нужно ли разбивать на чанки
-            if self.chunk_enabled and duration_sec > self.chunk_duration_sec:
+            # Быстрая обработка для коротких записей
+            if not self.chunk_enabled or duration_sec <= self.chunk_threshold_sec:
+                self.logger.info("⚡ Быстрая обработка (без чанков)")
+                return self._process_fast_audio(audio_data, progress_callback)
+            else:
                 self.logger.info("🎯 Длинная запись - используем чанковую обработку")
                 return self._process_long_audio(audio_data, progress_callback)
-            else:
-                self.logger.info("🎯 Короткая/средняя запись - прямая обработка")
-                return self._process_short_audio(audio_data, progress_callback)
 
         except Exception as e:
             self.logger.error(f"Ошибка обработки: {e}")
@@ -65,32 +70,43 @@ class AsyncSpeechProcessor:
             self._cleanup_memory()
             return "", None
 
-    def _process_short_audio(
+    def _process_fast_audio(
         self,
         audio_data: np.ndarray,
         progress_callback: Optional[Callable[[str], None]] = None
     ) -> Tuple[str, Optional[str]]:
-        """Обработка коротких записей (менее 5 минут)"""
+        """Быстрая обработка коротких записей (без чанков и тяжелых операций)"""
         if progress_callback:
-            progress_callback("🎯 Распознавание речи...")
+            progress_callback("⚡ Быстрая обработка...")
 
-        # Этап 1: Whisper - синхронно
+        # Этап 1: Whisper - синхронно, тихий режим для скорости
+        transcribed_text = self._sync_transcribe(audio_data, quiet=True)
+
+        if not transcribed_text.strip():
+            return "", None
+
+        # Этап 2: Постобработка - только пунктуация для скорости
+        punctuated_text = self._sync_punctuation(transcribed_text)
+
+        # Для коротких записей не тратим время на очистку памяти
+        self.logger.info("✅ Быстрая обработка завершена")
+        return punctuated_text, None
+
+    def _process_chunk_audio(
+        self,
+        audio_data: np.ndarray,
+        progress_callback: Optional[Callable[[str], None]] = None
+    ) -> Tuple[str, Optional[str]]:
+        """Обработка чанка (с полной постобработкой)"""
+        # Этап 1: Whisper
         transcribed_text = self._sync_transcribe(audio_data)
 
         if not transcribed_text.strip():
             return "", None
 
-        # Этап 2: Постобработка - синхронно
-        if progress_callback:
-            progress_callback("⚡ Постобработка текста...")
-
-        # Пунктуация
+        # Этап 2: Полная постобработка для чанков
         punctuated_text = self._sync_punctuation(transcribed_text)
 
-        # 🆕 Принудительная очистка памяти
-        self._cleanup_memory()
-
-        self.logger.info("✅ Обработка завершена")
         return punctuated_text, None
 
     def _process_long_audio(
@@ -117,13 +133,14 @@ class AsyncSpeechProcessor:
                 self.logger.info(f"📝 Обрабатываем чанк {i+1}/{total_chunks}")
 
                 # Обрабатываем чанк
-                chunk_result = self._process_short_audio(chunk, None)
+                chunk_result = self._process_chunk_audio(chunk, None)
 
                 if chunk_result and chunk_result[0].strip():
                     combined_text.append(chunk_result[0].strip())
 
-                # Очистка памяти между чанками
-                self._cleanup_memory()
+                # Очистка памяти между чанками (только если включено)
+                if self.force_gc:
+                    self._cleanup_memory()
 
             # Объединяем результаты
             if combined_text:
@@ -135,6 +152,10 @@ class AsyncSpeechProcessor:
 
                 final_text = self._sync_punctuation(final_text)
 
+                # Финальная очистка памяти только если включено
+                if self.force_gc:
+                    self._cleanup_memory()
+
                 self.logger.info(f"✅ Длинная запись обработана: {len(final_text)} символов")
                 return final_text, None
             else:
@@ -145,13 +166,17 @@ class AsyncSpeechProcessor:
             self.logger.error(f"Ошибка обработки длинного аудио: {e}")
             return "", None
 
-    def _sync_transcribe(self, audio_data: np.ndarray) -> str:
+    def _sync_transcribe(self, audio_data: np.ndarray, quiet: bool = False) -> str:
         """Синхронная транскрипция"""
         try:
             result = self.whisper_service.transcribe(audio_data)
             text = result.get("text", "") if isinstance(result, dict) else result
-            preview = text[:50] if text else "пусто"
-            self.logger.info(f"Whisper результат: '{preview}...'")
+
+            # Тихий режим для быстрой обработки
+            if not quiet:
+                preview = text[:50] if text else "пусто"
+                self.logger.info(f"Whisper результат: '{preview}...'")
+
             return text
         except Exception as e:
             self.logger.error(f"Ошибка Whisper: {e}")
