@@ -86,7 +86,7 @@ class AudioRecorder:
     def start_recording(self, callback: Optional[Callable] = None):
         """
         Начинает запись аудио
-        
+
         Args:
             callback: Функция обратного вызова для обработки аудио данных
         """
@@ -94,15 +94,14 @@ class AudioRecorder:
             if self.is_recording:
                 self.logger.warning("Запись уже идет")
                 return
-            
-            # 🆕 Переинициализируем PyAudio если нужно
+
+            # 🔧 Проверяем инициализацию PyAudio (только один раз)
             if self.audio is None:
-                self.logger.info("Переинициализация PyAudio...")
                 self._init_audio()
-            
+
             self.audio_callback = callback
             self.audio_data.clear()
-            
+
             # Открываем поток
             self.stream = self.audio.open(
                 format=self.format,
@@ -112,20 +111,27 @@ class AudioRecorder:
                 frames_per_buffer=self.chunk_size,
                 stream_callback=self._audio_callback
             )
-            
+
             self.is_recording = True
             self.stream.start_stream()
-            
-            # 🆕 Логируем настройки записи
+
+            # 🔧 Логируем настройки записи
             if self.max_duration > 0:
                 msg = f"Запись аудио начата (макс. {self.max_duration}с)"
                 self.logger.info(msg)
             else:
-                no_limit_msg = "Запись аудио начата (без ограничений по времени)"
+                no_limit_msg = "Запись аудио начата (без лимита по времени)"
                 self.logger.info(no_limit_msg)
-            
+
         except Exception as e:
             self.logger.error(f"Ошибка начала записи: {e}")
+            # 🔧 Безопасная очистка при ошибке
+            try:
+                if self.stream:
+                    self.stream.close()
+                    self.stream = None
+            except Exception:
+                pass
             raise
     
 
@@ -133,7 +139,7 @@ class AudioRecorder:
     def stop_recording(self) -> Optional[np.ndarray]:
         """
         Останавливает запись и возвращает аудио данные
-        
+
         Returns:
             Массив аудио данных или None при ошибке
         """
@@ -141,40 +147,34 @@ class AudioRecorder:
             if not self.is_recording:
                 self.logger.warning("Запись не активна")
                 return None
-            
+
             self.is_recording = False
-            
+
+            # 🔧 Закрываем только поток, но НЕ завершаем PyAudio!
             if self.stream:
                 self.stream.stop_stream()
                 self.stream.close()
                 self.stream = None
-            # Explicitly flush PyAudio instance buffers on stop
-            try:
-                if self.audio:
-                    self.audio.terminate()
-                    self.audio = None
-            except Exception:
-                pass
-            
+
             # Собираем аудио данные
             if self.audio_data:
                 audio_array = np.concatenate(list(self.audio_data))
                 # Сохраняем последнюю запись
                 self.last_recording = audio_array
-                
+
                 duration = len(audio_array) / self.sample_rate
                 duration_msg = f"Запись остановлена, длина: {duration:.2f}с"
                 self.logger.info(duration_msg)
-                
-                # 🆕 Очищаем буфер если включена настройка
+
+                # 🔧 Очищаем буфер если включена настройка
                 if self.cleanup_after_processing:
                     self._cleanup_buffer()
-                
+
                 return audio_array
             else:
                 self.logger.warning("Нет аудио данных")
                 return None
-                
+
         except Exception as e:
             self.logger.error(f"Ошибка остановки записи: {e}")
             return None
@@ -277,19 +277,33 @@ class AudioRecorder:
         try:
             if self.is_recording:
                 self.stop_recording()
-            
-            # 🆕 Полная очистка буферов
+
+            # 🔧 Очищаем только буферы, но сохраняем PyAudio
             self._cleanup_buffer()
-            
-            if self.audio:
-                self.audio.terminate()
-                self.audio = None
-            
-            self.logger.info("Аудио рекордер очищен")
-            
+
+            # 🔧 НЕ завершаем PyAudio - он должен жить в течение всего приложения
+            # if self.audio:
+            #     self.audio.terminate()
+            #     self.audio = None
+
+            self.logger.info("Аудио рекордер очищен (PyAudio сохранен)")
+
         except Exception as e:
             self.logger.error(f"Ошибка очистки рекордера: {e}")
     
     def __del__(self):
-        """Деструктор"""
-        self.cleanup() 
+        """Деструктор - завершает PyAudio"""
+        try:
+            if self.is_recording:
+                self.stop_recording()
+
+            # 🔧 В деструкторе завершаем PyAudio окончательно
+            if self.audio:
+                self.audio.terminate()
+                self.audio = None
+
+            self.logger.debug("AudioRecorder полностью уничтожен")
+
+        except Exception:
+            # Игнорируем ошибки в деструкторе
+            pass 
