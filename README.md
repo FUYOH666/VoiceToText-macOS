@@ -81,8 +81,23 @@
 
 ### Автовставка не работает
 - System Settings → Privacy & Security → Accessibility
-- Включите Python
+- Включите Python (ищите `/usr/bin/python3` или `/opt/homebrew/bin/python3`)
 - Перезапустите VTT
+
+### Не работают горячие клавиши (Option+Space)
+- System Settings → Privacy & Security → Accessibility
+- Добавьте Python в список доверенных приложений
+- Если не помогает, добавьте полный путь к Python: `/opt/homebrew/bin/python3`
+- Перезапустите VTT и попробуйте снова
+
+### Проверить статус accessibility:
+```bash
+# В терминале проверить статус
+python3 -c "
+import subprocess
+result = subprocess.run(['tccutil', 'reset', 'Accessibility'], capture_output=True)
+print('Accessibility сброшен, перезапустите VTT')
+"
 
 ### Нет звука
 - Проверьте микрофон в System Settings → Sound

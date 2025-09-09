@@ -78,9 +78,9 @@ performance:
   log_memory_usage: false  # Отключаем логирование для скорости
   chunk_processing:
     enabled: true  # Включена чанковая обработка
-    chunk_threshold_sec: 60  # Порог включения чанков - 1 минута (было 5 минут)
-    max_chunk_duration_sec: 30  # Уменьшаем до 30 секунд на чанк для скорости
-    chunk_overlap_sec: 1  # Уменьшаем перекрытие до 1 секунды для скорости
+    chunk_threshold_sec: 120  # Увеличиваем порог до 2 минут для комфортной работы
+    max_chunk_duration_sec: 45  # Оптимальный размер чанка
+    chunk_overlap_sec: 2  # Небольшое перекрытие для плавности
 
 debug:
   enable_detailed_logs: true

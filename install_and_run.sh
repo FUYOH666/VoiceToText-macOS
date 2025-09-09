@@ -68,6 +68,29 @@ except ImportError as e:
     sys.exit(1)
 "
 
+# Проверка accessibility
+echo ""
+echo "🔐 Проверка accessibility для горячих клавиш..."
+./venv/bin/python -c "
+import sys
+try:
+    import pynput.keyboard
+    listener = pynput.keyboard.Listener(on_press=lambda k: None)
+    listener.start()
+    listener.stop()
+    print('✅ Accessibility настроен корректно')
+except Exception as e:
+    print('⚠️  ВНИМАНИЕ: Проблемы с accessibility')
+    print('   Горячие клавиши могут не работать')
+    print('')
+    print('   🔧 Для исправления:')
+    print('   1. ./fix_accessibility.sh')
+    print('   2. System Settings → Privacy & Security → Accessibility')
+    print('   3. Добавьте Python в список доверенных приложений')
+    print('')
+    print('   📍 Найдите Python по пути: $(which python3)')
+"
+
 echo ""
 echo "🎤 VTT (VoiceToText) готов к работе!"
 echo "==============================="

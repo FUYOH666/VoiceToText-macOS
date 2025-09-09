@@ -84,6 +84,9 @@ SUPERWHISPER_IMPROVEMENT_IDEAS.md
 # Debugging scripts
 monitor_memory.sh
 
+# User convenience scripts (keep for users)
+!fix_accessibility.sh
+
 # Planning documents (created for user convenience)
 PROJECT_IDEAS_WHITEHAT.md
 CLI_ANALYZER_PLAN.md
