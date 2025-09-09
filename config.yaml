@@ -34,10 +34,18 @@ whisper:
 
 punctuation:
   enabled: true
-  mode: "bert"  # Используем BERT-модель
+  mode: "improved"  # Используем улучшенный rule-based режим (без BERT)
   cache_dir: "./cache/punctuation"
+
+  # Для включения BERT-модели (требует токен Hugging Face):
+  # mode: "bert"
+  # model:
+  #   provider: "deeppavlov"
+  #   name: "DeepPavlov/bert-base-cased-sentence"
+  #   use_gpu: false
+
   model:
-    provider: "deeppavlov"  # bert, deeppavlov, none
+    provider: "none"  # Отключаем BERT-модель по умолчанию (не требует токена)
     name: "DeepPavlov/bert-base-cased-sentence"
     use_gpu: false
   rules:

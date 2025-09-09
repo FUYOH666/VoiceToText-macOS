@@ -88,8 +88,8 @@ class PunctuationService:
             self.logger.info("✅ BERT-модель для пунктуации загружена успешно")
 
         except Exception as e:
-            self.logger.error(f"❌ Ошибка загрузки BERT-модели: {e}")
-            self.logger.info("Переключаемся на rule-based режим")
+            self.logger.warning(f"⚠️ BERT-модель недоступна: {str(e).split(':')[0]}")
+            self.logger.info("Переключаемся на rule-based режим (нормально)")
             self.model_provider = 'none'
 
     def restore_punctuation(self, text) -> str:
