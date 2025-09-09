@@ -403,6 +403,70 @@
     "expand": "Whisper",
     "context": "OpenAI Whisper model"
   },
+  "MLX Whisper": {
+    "expand": "MLX Whisper",
+    "context": "MLX Whisper"
+  },
+  "Apple Silicon": {
+    "expand": "Apple Silicon",
+    "context": "Apple Silicon"
+  },
+  "Voice To Text": {
+    "expand": "Voice To Text",
+    "context": "Voice To Text"
+  },
+  "Voice-to-Text": {
+    "expand": "Voice-to-Text",
+    "context": "Voice-to-Text"
+  },
+  "macOS": {
+    "expand": "macOS",
+    "context": "macOS"
+  },
+  "requirements.txt": {
+    "expand": "requirements.txt",
+    "context": "requirements.txt"
+  },
+  "config.yaml": {
+    "expand": "config.yaml",
+    "context": "config.yaml"
+  },
+  "README.md": {
+    "expand": "README.md",
+    "context": "README.md"
+  },
+  "GitHub": {
+    "expand": "GitHub",
+    "context": "GitHub"
+  },
+  "Large V3": {
+    "expand": "large-v3",
+    "context": "large-v3"
+  },
+  "mlx-community": {
+    "expand": "mlx-community",
+    "context": "mlx-community"
+  },
+  "Option Space": {
+    "expand": "Option+Space",
+    "context": "Option+Space"
+  },
+  "горячие клавиши": {
+    "expand": "горячие клавиши",
+    "context": "горячие клавиши"
+  },
+  "автовставка": {
+    "expand": "автовставка",
+    "context": "автовставка"
+  },
+  "оффлайн": {
+    "expand": "оффлайн",
+    "context": "оффлайн"
+  },
+  "без облаков": {
+    "expand": "без облаков",
+    "context": "без облаков"
+  },
   "VTT": {
     "expand": "VoiceToText",
     "context": "Voice To Text"
@@ -457,7 +521,7 @@
   },
   "YAML": {
     "expand": "YAML Ain't Markup Language",
-    "context": "формат конфигурационных файлов"
+    "context": "YAML"
   },
   "SQL": {
     "expand": "Structured Query Language",

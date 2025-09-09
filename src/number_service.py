@@ -21,6 +21,9 @@ class NumberService:
         self.format_percentages = True
         self.format_ranges = True
         self.format_units = True
+        self.format_dates = True
+        self.format_time = True
+        self.format_file_sizes = True
         self.quiet_mode = True  # Тихий режим без логов
 
         if config and hasattr(config, 'numbers'):
@@ -30,6 +33,9 @@ class NumberService:
             self.format_percentages = numbers_config.get('format_percentages', True)
             self.format_ranges = numbers_config.get('format_ranges', True)
             self.format_units = numbers_config.get('format_units', True)
+            self.format_dates = numbers_config.get('format_dates', True)
+            self.format_time = numbers_config.get('format_time', True)
+            self.format_file_sizes = numbers_config.get('format_file_sizes', True)
 
         # Паттерны для чисел
         self.number_patterns = {
@@ -44,7 +50,23 @@ class NumberService:
             'range_from_to': re.compile(r'\bот\s+(\d+)\s+до\s+(\d+)\b', re.IGNORECASE),
 
             # Единицы измерения
-            'units': re.compile(r'\b(\d+)\s*(звонков|рубл(?:ей|я|ь)|долларов|евро|процент(?:а|ов)?|штук|часов|минут|секунд|дней|недель|месяцев|лет|километров|метров|граммов|килограммов|тонн)\b', re.IGNORECASE)
+            'units': re.compile(r'\b(\d+)\s*(звонков|рубл(?:ей|я|ь)|долларов|евро|процент(?:а|ов)?|штук|часов|минут|секунд|дней|недель|месяцев|лет|километров|метров|граммов|килограммов|тонн)\b', re.IGNORECASE),
+
+            # Даты и годы
+            'year': re.compile(r'\b(\d{4})\s+год(?:у|а|е|ом)?\b', re.IGNORECASE),
+            'century': re.compile(r'\b(\d{2})(?:0(?:0(?:года?|лет)?)?)\s+год(?:у|а|е|ом)?\b', re.IGNORECASE),
+
+            # Время (часы:минуты)
+            'time_hm': re.compile(r'\b(\d{1,2}):(\d{2})\b'),
+
+            # Телефонные номера
+            'phone': re.compile(r'\b(\d{3})[\s\-\.]?(\d{3})[\s\-\.]?(\d{4})\b'),
+
+            # Размеры файлов (MB, GB, etc.)
+            'file_size': re.compile(r'\b(\d+(?:\.\d+)?)\s*(MB|GB|TB|KB)\b', re.IGNORECASE),
+
+            # Дробные числа
+            'decimal': re.compile(r'\b(\d+)\.(\d+)\b')
         }
 
         # Сокращения единиц
@@ -95,6 +117,18 @@ class NumberService:
             # Шаг 4: Форматирование единиц измерения
             if self.format_units:
                 text = self._format_units(text)
+
+            # Шаг 5: Форматирование дат
+            if self.format_dates:
+                text = self._format_dates(text)
+
+            # Шаг 6: Форматирование времени
+            if self.format_time:
+                text = self._format_time(text)
+
+            # Шаг 7: Форматирование размеров файлов
+            if self.format_file_sizes:
+                text = self._format_file_sizes(text)
 
             return text
 
@@ -173,6 +207,68 @@ class NumberService:
             self.logger.error(f"Ошибка форматирования единиц: {e}")
             return text
 
+    def _format_dates(self, text: str) -> str:
+        """Форматирует даты и годы"""
+        try:
+            # Форматируем годы (2025 год -> 2025)
+            def format_year(match):
+                year = match.group(1)
+                return year
+
+            text = self.number_patterns['year'].sub(format_year, text)
+
+            # Форматируем века (дополнительная обработка)
+            def format_century(match):
+                century = match.group(1)
+                return f"{century}00"
+
+            text = self.number_patterns['century'].sub(format_century, text)
+
+            return text
+
+        except Exception as e:
+            self.logger.error(f"Ошибка форматирования дат: {e}")
+            return text
+
+    def _format_time(self, text: str) -> str:
+        """Форматирует время"""
+        try:
+            def format_time_hm(match):
+                hours = match.group(1)
+                minutes = match.group(2)
+                return f"{hours}:{minutes}"
+
+            text = self.number_patterns['time_hm'].sub(format_time_hm, text)
+
+            # Форматируем телефонные номера
+            def format_phone(match):
+                area = match.group(1)
+                prefix = match.group(2)
+                number = match.group(3)
+                return f"{area}-{prefix}-{number}"
+
+            text = self.number_patterns['phone'].sub(format_phone, text)
+
+            return text
+
+        except Exception as e:
+            self.logger.error(f"Ошибка форматирования времени: {e}")
+            return text
+
+    def _format_file_sizes(self, text: str) -> str:
+        """Форматирует размеры файлов"""
+        try:
+            def format_file_size(match):
+                size = match.group(1)
+                unit = match.group(2).upper()
+                return f"{size} {unit}"
+
+            return self.number_patterns['file_size'].sub(format_file_size, text)
+
+        except Exception as e:
+            self.logger.error(f"Ошибка форматирования размеров файлов: {e}")
+            return text
+
     def add_custom_unit(self, full_name: str, abbreviation: str):
         """Добавляет пользовательскую единицу измерения"""
         try:
@@ -201,6 +297,9 @@ class NumberService:
             "format_percentages": self.format_percentages,
             "format_ranges": self.format_ranges,
             "format_units": self.format_units,
+            "format_dates": self.format_dates,
+            "format_time": self.format_time,
+            "format_file_sizes": self.format_file_sizes,
             "unit_abbreviations_count": len(self.unit_abbreviations)
         }
 
@@ -211,7 +310,11 @@ class NumberService:
             re.compile(r'\d{4,}'),  # Большие числа
             re.compile(r'\d+%'),    # Проценты
             re.compile(r'\d+-\d+'), # Диапазоны
-            re.compile(r'от \d+ до \d+', re.IGNORECASE)  # Диапазоны словами
+            re.compile(r'от \d+ до \d+', re.IGNORECASE),  # Диапазоны словами
+            re.compile(r'\d{4}\s+год', re.IGNORECASE),  # Годы
+            re.compile(r'\d{1,2}:\d{2}'),  # Время
+            re.compile(r'\d+\.\d+'),  # Дробные числа
+            re.compile(r'\d+\s*(MB|GB|TB|KB)', re.IGNORECASE)  # Размеры файлов
         ]
 
         return any(pattern.search(text) for pattern in number_indicators)

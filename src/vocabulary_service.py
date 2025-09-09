@@ -89,16 +89,72 @@ class VocabularyService:
     def _expand_abbreviations(self, text: str) -> str:
         """Расширяет аббревиатуры в тексте"""
         try:
-            for abbr, data in self.abbreviations.items():
+            # Сортируем аббревиатуры по длине (сначала длинные, потом короткие)
+            # Это важно для обработки составных терминов
+            sorted_abbrs = sorted(self.abbreviations.items(),
+                                key=lambda x: len(x[0]), reverse=True)
+
+            for abbr, data in sorted_abbrs:
                 if isinstance(data, dict) and 'expand' in data:
                     expand_to = data.get('context', data['expand'])  # Предпочитаем русский контекст
-                    # Заменяем аббревиатуру с учетом границ слов
-                    pattern = r'\b' + re.escape(abbr) + r'\b'
-                    text = re.sub(pattern, expand_to, text, flags=re.IGNORECASE)
+
+                    # Специальная обработка для составных терминов
+                    if ' ' in abbr:  # Составной термин (например, "MLX Whisper")
+                        # Ищем точное совпадение фразы
+                        pattern = r'\b' + re.escape(abbr) + r'\b'
+                        text = re.sub(pattern, expand_to, text, flags=re.IGNORECASE)
+                    else:
+                        # Обычная аббревиатура
+                        pattern = r'\b' + re.escape(abbr) + r'\b'
+                        text = re.sub(pattern, expand_to, text, flags=re.IGNORECASE)
+
+            # Дополнительная обработка специфичных случаев Whisper
+            text = self._fix_whisper_artifacts(text)
 
             return text
         except Exception as e:
             self.logger.error(f"Ошибка расширения аббревиатур: {e}")
+            return text
+
+    def _fix_whisper_artifacts(self, text: str) -> str:
+        """Исправляет специфичные артефакты Whisper модели"""
+        try:
+            # Исправляем "Apple MLX framework. OpenAI Whisper model" → "MLX Whisper"
+            text = re.sub(r'Apple\s+MLX\s+framework\.?\s*OpenAI\s+Whisper\s+model',
+                         'MLX Whisper', text, flags=re.IGNORECASE)
+
+            # Более агрессивный вариант - исправляем любую комбинацию
+            text = re.sub(r'Apple\s+MLX\s+framework(?:\.?\s*OpenAI\s+Whisper\s+model)?',
+                         'MLX Whisper', text, flags=re.IGNORECASE)
+
+            # Исправляем "Apple MLX framework" → "MLX"
+            text = re.sub(r'Apple\s+MLX\s+framework', 'MLX', text, flags=re.IGNORECASE)
+
+            # Исправляем "OpenAI Whisper model" → "Whisper"
+            text = re.sub(r'OpenAI\s+Whisper\s+model', 'Whisper', text, flags=re.IGNORECASE)
+
+            # Исправляем "операционная система" → "macOS" в контексте
+            text = re.sub(r'для\s+Mac\s+операционная\s+система',
+                         'для macOS', text, flags=re.IGNORECASE)
+
+            # Исправляем "Voice – to – Text" → "Voice-to-Text"
+            text = re.sub(r'\bVoice\s*–\s*to\s*–\s*Text\b', 'Voice-to-Text', text, flags=re.IGNORECASE)
+
+            # Исправляем "Voice to Text" → "Voice-to-Text"
+            text = re.sub(r'\bVoice\s+to\s+Text\b', 'Voice-to-Text', text, flags=re.IGNORECASE)
+
+            # Исправляем "Voice To Text" → "Voice-to-Text"
+            text = re.sub(r'\bVoice\s+To\s+Text\b', 'Voice-to-Text', text, flags=re.IGNORECASE)
+
+            # Исправляем "post-обработку" → "постобработку"
+            text = re.sub(r'post\s*-\s*обработку', 'постобработку', text, flags=re.IGNORECASE)
+
+            # Исправляем "слов-паразитов" → "слов-паразитов"
+            text = re.sub(r'слов\s*-\s*паразитов', 'слов-паразитов', text, flags=re.IGNORECASE)
+
+            return text
+        except Exception as e:
+            self.logger.error(f"Ошибка исправления артефактов Whisper: {e}")
             return text
 
     def _capitalize_names(self, text: str) -> str:

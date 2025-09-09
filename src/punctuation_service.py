@@ -6,7 +6,18 @@
 import logging
 import re
 from typing import Dict, Any, List
-from pathlib import Path
+import os
+
+# Для BERT-модели
+try:
+    from transformers import pipeline, AutoTokenizer, AutoModelForTokenClassification
+    import torch
+    TRANSFORMERS_AVAILABLE = True
+except ImportError:
+    TRANSFORMERS_AVAILABLE = False
+    pipeline = None
+    AutoTokenizer = None
+    AutoModelForTokenClassification = None
 
 
 class PunctuationService:
@@ -14,8 +25,8 @@ class PunctuationService:
     
     def __init__(self, config: Any):
         """
-        Инициализация улучшенного сервиса пунктуации
-        
+        Инициализация улучшенного сервиса пунктуации с поддержкой BERT
+
         Args:
             config: Объект конфигурации
         """
@@ -23,12 +34,64 @@ class PunctuationService:
         self.logger = logging.getLogger(__name__)
         self.model = None
         self.tokenizer = None
-        
-        # Режимы работы
-        punctuation_config = config.models.get("punctuation", {})
+        self.bert_pipeline = None
+
+        # Конфигурация пунктуации
+        punctuation_config = config.get("punctuation", {})
         self.mode = punctuation_config.get('mode', 'conservative')
-        self.logger.info(f"Инициализация улучшенного сервиса пунктуации (режим: {self.mode})")
-    
+        self.cache_dir = punctuation_config.get('cache_dir', './cache/punctuation')
+
+        # Конфигурация модели
+        model_config = punctuation_config.get('model', {})
+        self.model_provider = model_config.get('provider', 'none')
+        self.model_name = model_config.get('name', 'DeepPavlov/bert-base-cased-sentence')
+        self.use_gpu = model_config.get('use_gpu', False)
+
+        # Конфигурация правил
+        rules_config = punctuation_config.get('rules', {})
+        self.aggressive_commas = rules_config.get('aggressive_commas', False)
+        self.fix_abbreviations = rules_config.get('fix_abbreviations', True)
+
+        self.logger.info(f"Инициализация сервиса пунктуации (режим: {self.mode}, модель: {self.model_provider})")
+
+        # Инициализация BERT-модели если возможно
+        if self.model_provider != 'none':
+            self._init_bert_model()
+
+    def _init_bert_model(self):
+        """
+        Инициализация BERT-модели для восстановления пунктуации
+        """
+        if not TRANSFORMERS_AVAILABLE:
+            self.logger.warning("Transformers не доступны, отключаем BERT-модель")
+            self.model_provider = 'none'
+            return
+
+        try:
+            self.logger.info(f"Загрузка BERT-модели: {self.model_name}")
+
+            # Создаем директорию для кэша если её нет
+            os.makedirs(self.cache_dir, exist_ok=True)
+
+            # Загружаем модель
+            device = 0 if self.use_gpu and torch.cuda.is_available() else -1
+
+            self.bert_pipeline = pipeline(
+                "token-classification",
+                model=self.model_name,
+                tokenizer=self.model_name,
+                device=device,
+                cache_dir=self.cache_dir,
+                aggregation_strategy="simple"
+            )
+
+            self.logger.info("✅ BERT-модель для пунктуации загружена успешно")
+
+        except Exception as e:
+            self.logger.error(f"❌ Ошибка загрузки BERT-модели: {e}")
+            self.logger.info("Переключаемся на rule-based режим")
+            self.model_provider = 'none'
+
     def restore_punctuation(self, text) -> str:
         """
         Восстанавливает пунктуацию и регистр в тексте
@@ -55,19 +118,133 @@ class PunctuationService:
             text = self._pre_clean_text(text)
             
             # Выбираем метод в зависимости от режима
-            if self.mode == 'conservative':
+            if self.mode == 'bert' and self.bert_pipeline:
+                # Приоритет: BERT-модель если доступна
+                self.logger.info("Используем BERT-модель для восстановления пунктуации")
+                return self._restore_with_bert(text)
+            elif self.mode == 'conservative':
                 return self._restore_conservative(text)
             elif self.mode == 'improved':
                 return self._restore_improved_fixed(text)
             else:
                 # Fallback на консервативный
                 return self._restore_conservative(text)
-                
+
         except Exception as e:
             self.logger.error(f"Ошибка восстановления пунктуации: {e}")
             # Возвращаем базовую обработку
             return self._restore_basic_safe(text)
-    
+
+    def _restore_with_bert(self, text: str) -> str:
+        """
+        Восстановление пунктуации с помощью BERT-модели
+
+        Args:
+            text: Исходный текст без пунктуации
+
+        Returns:
+            Текст с восстановленной пунктуацией
+        """
+        try:
+            if not self.bert_pipeline:
+                self.logger.warning("BERT-модель недоступна, переключаемся на rule-based")
+                return self._restore_improved_fixed(text)
+
+            self.logger.info("🔧 BERT: Анализ текста для восстановления пунктуации")
+
+            # Получаем предсказания от модели
+            predictions = self.bert_pipeline(text)
+
+            # Применяем предсказания к тексту
+            result = self._apply_bert_predictions(text, predictions)
+
+            # Постобработка для улучшения результата
+            result = self._post_process_bert_result(result)
+
+            self.logger.info("✅ BERT: Пунктуация восстановлена")
+            return result
+
+        except Exception as e:
+            self.logger.error(f"Ошибка BERT-восстановления: {e}")
+            # Fallback на улучшенный rule-based
+            return self._restore_improved_fixed(text)
+
+    def _apply_bert_predictions(self, text: str, predictions: List[Dict]) -> str:
+        """
+        Применяет предсказания BERT-модели к тексту
+
+        Args:
+            text: Исходный текст
+            predictions: Предсказания модели
+
+        Returns:
+            Текст с примененными предсказаниями
+        """
+        if not predictions:
+            return text
+
+        result = text
+        offset = 0  # Смещение из-за вставленных символов
+
+        for pred in predictions:
+            if pred['entity'] in ['PERIOD', 'COMMA', 'QUESTION', 'EXCLAMATION']:
+                # Получаем позицию для вставки
+                start_pos = pred['start'] + offset
+
+                # Определяем символ пунктуации
+                if pred['entity'] == 'PERIOD':
+                    punct = '.'
+                elif pred['entity'] == 'COMMA':
+                    punct = ','
+                elif pred['entity'] == 'QUESTION':
+                    punct = '?'
+                elif pred['entity'] == 'EXCLAMATION':
+                    punct = '!'
+                else:
+                    continue
+
+                # Проверяем, что на этой позиции еще нет пунктуации
+                if start_pos < len(result) and result[start_pos] not in '.!?,;:':
+                    # Вставляем символ
+                    result = result[:start_pos] + punct + result[start_pos:]
+                    offset += 1
+
+        return result
+
+    def _post_process_bert_result(self, text: str) -> str:
+        """
+        Постобработка результата BERT-модели
+
+        Args:
+            text: Результат BERT-обработки
+
+        Returns:
+            Финально обработанный текст
+        """
+        # Исправляем двойные знаки препинания
+        text = re.sub(r'([.!?])\1+', r'\1', text)
+
+        # Исправляем пробелы вокруг знаков препинания
+        text = re.sub(r'\s*([.!?,;:])\s*', r'\1 ', text)
+
+        # Исправляем начало предложений (капитализация)
+        sentences = re.split(r'([.!?]\s*)', text)
+        result_sentences = []
+
+        for i, sentence in enumerate(sentences):
+            if i % 2 == 0:  # Текст предложения
+                sentence = sentence.strip()
+                if sentence:
+                    sentence = sentence[0].upper() + sentence[1:]
+            result_sentences.append(sentence)
+
+        result = ''.join(result_sentences)
+
+        # Финальная очистка
+        result = self._post_process_safe(result)
+
+        return result
+
     def _pre_clean_text(self, text: str) -> str:
         """
         ПРЕДВАРИТЕЛЬНАЯ очистка входного текста от артефактов Whisper

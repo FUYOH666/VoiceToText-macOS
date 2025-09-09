@@ -34,8 +34,15 @@ whisper:
 
 punctuation:
   enabled: true
-  mode: "simple"
+  mode: "bert"  # Используем BERT-модель
   cache_dir: "./cache/punctuation"
+  model:
+    provider: "deeppavlov"  # bert, deeppavlov, none
+    name: "DeepPavlov/bert-base-cased-sentence"
+    use_gpu: false
+  rules:
+    aggressive_commas: false  # Безопасный режим для запятых
+    fix_abbreviations: true   # Исправлять аббревиатуры
 
 vocabulary:
   enabled: true
@@ -59,6 +66,9 @@ numbers:
   format_percentages: true
   format_ranges: true
   format_units: true
+  format_dates: true
+  format_time: true
+  format_file_sizes: true
   quiet_mode: true  # Тихий режим для личного использования
 
 performance:
