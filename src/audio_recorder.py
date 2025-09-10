@@ -26,7 +26,7 @@ class AudioRecorder:
         
         # Аудио параметры
         self.sample_rate = config.audio["sample_rate"]
-        self.chunk_size = 1024
+        self.chunk_size = 4096  # 🔥 Увеличено с 1024 до 4096 для лучшей производительности на M4 Max
         self.channels = 1  # Моно
         self.format = pyaudio.paFloat32
         

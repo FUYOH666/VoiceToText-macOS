@@ -98,11 +98,12 @@ class VTTApp(rumps.App):
             # 🔢 НОВЫЙ СЕРВИС - форматирование чисел
             self.number_service = NumberService(self.config)
 
-            # Async процессор для ускорения
+            # Async процессор для ускорения - используем 8 ядер из 16 для оптимальной производительности
             self.async_processor = AsyncSpeechProcessor(
                 self.whisper_service,
                 self.punctuation_service,
-                self.config
+                self.config,
+                max_workers=8  # 🔥 Используем 8 ядер из 16 для M4 Max
             )
             
             self.logger.info("Все сервисы инициализированы")
@@ -400,10 +401,10 @@ class VTTApp(rumps.App):
             # Удаляем временные WAV/MP3 файлы из cache
             cache_dir = Path("cache")
             if cache_dir.exists():
-                # Удаляем файлы старше 5 минут (оставляем только свежие)
+                # Удаляем файлы старше 30 минут (оставляем только свежие)
                 import time
                 current_time = time.time()
-                max_age = 300  # 5 минут
+                max_age = 1800  # 🔥 30 минут для M4 Max
 
                 for audio_file in cache_dir.glob("*.wav"):
                     if current_time - audio_file.stat().st_mtime > max_age:
