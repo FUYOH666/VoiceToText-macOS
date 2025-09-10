@@ -118,10 +118,17 @@ class VTTApp(rumps.App):
             callback=self.toggle_recording
         )
 
+        self.stop_menu_item = rumps.MenuItem(
+            "⏹ Остановить запись",
+            callback=self.stop_recording
+        )
+        self.stop_menu_item.set_callback_enabled(False)  # Скрываем по умолчанию
+
         self.menu = [
             rumps.MenuItem("📍 Статус: Готов", callback=None),
             rumps.separator,
             self.record_menu_item,
+            self.stop_menu_item,
             rumps.separator,
             rumps.MenuItem("📋 Копировать текст", callback=self.copy_text),
             rumps.MenuItem("📝 Показать текст", callback=self.show_text),
@@ -184,6 +191,7 @@ class VTTApp(rumps.App):
             
             # Обновляем меню
             self.record_menu_item.title = "⏹ Остановить запись"
+            self.stop_menu_item.set_callback_enabled(True)  # Показываем кнопку остановки
             
             # Уведомление о начале записи
             self.notification_service.notify_recording_started()
@@ -223,6 +231,7 @@ class VTTApp(rumps.App):
             
             # Обновляем меню
             self.record_menu_item.title = "🎤 Начать запись"
+            self.stop_menu_item.set_callback_enabled(False)  # Скрываем кнопку остановки
             
             if audio_data is not None and len(audio_data) > 0:
                 # Обработка в отдельном потоке
@@ -391,10 +400,10 @@ class VTTApp(rumps.App):
             # Удаляем временные WAV/MP3 файлы из cache
             cache_dir = Path("cache")
             if cache_dir.exists():
-                # Удаляем файлы старше 1 минуты (оставляем только свежие)
+                # Удаляем файлы старше 5 минут (оставляем только свежие)
                 import time
                 current_time = time.time()
-                max_age = 60  # 1 минута
+                max_age = 300  # 5 минут
 
                 for audio_file in cache_dir.glob("*.wav"):
                     if current_time - audio_file.stat().st_mtime > max_age:
@@ -466,10 +475,13 @@ class VTTApp(rumps.App):
     def _start_recording_timer(self):
         """Запуск таймера записи"""
         def update_timer():
-            while self.is_recording:
-                self._update_progress("RECORDING")
-                time.sleep(1)
-        
+            try:
+                while self.is_recording:
+                    self._update_progress("RECORDING")
+                    time.sleep(1)
+            except Exception as e:
+                self.logger.error(f"Ошибка в таймере записи: {e}")
+
         self.recording_timer = threading.Thread(target=update_timer, daemon=True)
         self.recording_timer.start()
     

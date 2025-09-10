@@ -80,15 +80,15 @@ numbers:
   quiet_mode: true  # Тихий режим для личного использования
 
 performance:
-  force_garbage_collection: false  # Отключаем для скорости - включаем только для длинных записей
-  clear_model_cache_after_use: false  # Отключаем для скорости - включаем только для длинных записей
-  memory_limit_mb: 1024  # Уменьшаем для коротких записей
-  log_memory_usage: false  # Отключаем логирование для скорости
+  force_garbage_collection: true  # Включаем для длинных записей
+  clear_model_cache_after_use: true  # Очищаем кэш после использования
+  memory_limit_mb: 2048  # Увеличиваем лимит памяти
+  log_memory_usage: true  # Включаем логирование памяти
   chunk_processing:
     enabled: true  # Включена чанковая обработка
-    chunk_threshold_sec: 120  # Увеличиваем порог до 2 минут для комфортной работы
-    max_chunk_duration_sec: 45  # Оптимальный размер чанка
-    chunk_overlap_sec: 2  # Небольшое перекрытие для плавности
+    chunk_threshold_sec: 300  # Увеличиваем порог до 5 минут для комфортной работы
+    max_chunk_duration_sec: 60  # Увеличиваем размер чанка
+    chunk_overlap_sec: 3  # Небольшое перекрытие для плавности
 
 debug:
   enable_detailed_logs: true
