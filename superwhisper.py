@@ -123,7 +123,8 @@ class VTTApp(rumps.App):
             "⏹ Остановить запись",
             callback=self.stop_recording
         )
-        self.stop_menu_item.set_callback_enabled(False)  # Скрываем по умолчанию
+        # В rumps пункты меню нельзя скрывать, поэтому изначально ставим callback в None
+        self.stop_menu_item.set_callback(None)  # Отключаем по умолчанию
 
         self.menu = [
             rumps.MenuItem("📍 Статус: Готов", callback=None),
@@ -192,7 +193,7 @@ class VTTApp(rumps.App):
             
             # Обновляем меню
             self.record_menu_item.title = "⏹ Остановить запись"
-            self.stop_menu_item.set_callback_enabled(True)  # Показываем кнопку остановки
+            self.stop_menu_item.set_callback(self.stop_recording)  # Включаем кнопку остановки
             
             # Уведомление о начале записи
             self.notification_service.notify_recording_started()
@@ -232,7 +233,7 @@ class VTTApp(rumps.App):
             
             # Обновляем меню
             self.record_menu_item.title = "🎤 Начать запись"
-            self.stop_menu_item.set_callback_enabled(False)  # Скрываем кнопку остановки
+            self.stop_menu_item.set_callback(None)  # Отключаем кнопку остановки
             
             if audio_data is not None and len(audio_data) > 0:
                 # Обработка в отдельном потоке
