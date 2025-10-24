@@ -91,3 +91,36 @@ monitor_memory.sh
 PROJECT_IDEAS_WHITEHAT.md
 CLI_ANALYZER_PLAN.md
 стиль ведения Гитхаба.md
+
+# Environment variables and secrets
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+*.crt
+credentials.json
+config.local.*
+secrets.yml
+.env.backup
+
+# Security sensitive files
+**/secrets/
+**/keys/
+**/certs/
+**/ssl/
+
+# API keys and tokens
+*.api_key
+*.token
+api_keys.txt
+tokens.json
+
+# Database credentials
+*.db_pass
+database.yml
+db_config.json
+
+# Backup files with sensitive data
+*.bak
+*~
